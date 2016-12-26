@@ -43,6 +43,46 @@ For Each c In CodeRange
 
 Next
 
+Call DeleteTiedItemRecord
+
+End Sub
+Private Sub DeleteTiedItemRecord()
+'7777始まり商品コードの行削除
+
+Range("A1").AutoFilter 2, "77777*"
+
+Dim LastRow As Long
+LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
+
+Dim TiedItemCodes As Range
+Set TiedItemCodes = Intersect(Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible), Range("B2:B" & LastRow))
+
+Dim i As Long, v As Variant, Dellrow As Range
+
+For Each v In TiedItemCodes
+
+    Dim CurRowNum As Long
+    
+    CurRowNum = v.Row
+    
+    '削除する行をDellRowに追加していく
+    If Dellrow Is Nothing Then
+    
+        Set Dellrow = Rows(CurRowNum)
+        
+    Else
+        
+        Set Dellrow = Union(Dellrow, Rows(CurRowNum))
+    
+    End If
+
+Next
+
+'フィルター解除
+Range("A1").AutoFilter
+
+Dellrow.Delete
+
 End Sub
 
 Private Sub ParseTiedItem(CodeCell As Range)

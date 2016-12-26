@@ -40,6 +40,7 @@ End With
 
 ActiveWorkbook.Connections(1).Delete
 
+ActiveSheet.Shapes("ButtonExecuteMain").Delete
 
 '読み込み後、取込日の日付チェック 最初の注文行と最後の注文行の日付に対して
 
@@ -74,7 +75,7 @@ If ContinueWrongDate = vbNo Then
     Else
         'データ確認の上で続行する場合、続行用ボタンを追加。
         With ActiveSheet.Buttons.Add(709.5, 54, 201, 42)
-            .OnAction = "作業シートへデータ抽出"
+            .OnAction = "生成のみ実行"
             .Characters.Text = "読込済データで処理を続行"
         End With
     
