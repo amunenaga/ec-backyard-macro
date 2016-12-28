@@ -159,8 +159,8 @@ k = 2
 
 Do
 
-    '7777始まりは転記しない
-    If Cells(i, 3).Value Like "77777" Then GoTo Continue
+    '7777始まりは転記しない、作業シートでは削除済みだが、一応判定は残す
+    If Cells(i, 2).Value Like "77777*" Then GoTo Continue
     
     '1行分のレンジを定義
     Dim Record As Range

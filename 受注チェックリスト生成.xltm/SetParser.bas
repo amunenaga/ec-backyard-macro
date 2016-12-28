@@ -57,22 +57,18 @@ LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 Dim TiedItemCodes As Range
 Set TiedItemCodes = Intersect(Range("A1").CurrentRegion.SpecialCells(xlCellTypeVisible), Range("B2:B" & LastRow))
 
-Dim i As Long, v As Variant, Dellrow As Range
+Dim i As Long, v As Variant, dellrow As Range
 
 For Each v In TiedItemCodes
-
-    Dim CurRowNum As Long
-    
-    CurRowNum = v.Row
     
     '削除する行をDellRowに追加していく
-    If Dellrow Is Nothing Then
+    If dellrow Is Nothing Then
     
-        Set Dellrow = Rows(CurRowNum)
+        Set dellrow = v.EntireRow
         
     Else
         
-        Set Dellrow = Union(Dellrow, Rows(CurRowNum))
+        Set dellrow = Union(dellrow, v.EntireRow)
     
     End If
 
@@ -81,7 +77,7 @@ Next
 'フィルター解除
 Range("A1").AutoFilter
 
-Dellrow.Delete
+dellrow.Delete
 
 End Sub
 
