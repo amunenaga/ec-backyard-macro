@@ -18,35 +18,35 @@ Sub ICOKURI連結()
     
     End If
     
+    'マクロ起動ボタンを削除
+    Sheet1.Shapes(1).Delete
+    
     '連結したCSVをxlsx形式で保存
     Application.DisplayAlerts = False
     
         ThisWorkbook.SaveAs Filename:=PutFolder & "ICOKURI" & Format(Date, "MMdd") & ".xlsx"
      
     Application.DisplayAlerts = True
-
-    'マクロ起動ボタンを削除
-    Sheet1.Shapes(1).Delete
     
 End Sub
 
 Private Sub ConcatenateICOKURI()
-Const B2_FOLDER As String = "\\Server02\商品部\ネット販売関連\梱包室データ\B2ヤマトデータ\"
+Const ICOKURI_PC As String = "\\mos10\"
 
 Dim FolderName(2) As String
-FolderName(0) = "アマゾン"
-FolderName(1) = "楽天"
-FolderName(2) = "ヤフー"
+FolderName(0) = "アマゾン宅配便"
+FolderName(1) = "楽天発払"
+FolderName(2) = "ヤフー\ヤフー発払い"
 
-Dim v As Variant
+Dim i As Integer
 
-For Each v In FolderName
+For i = 0 To 2
 
-    Dim B2CsvPath As String
-    B2CsvPath = FindTodaysCSV(B2_FOLDER & v)
+    Dim CsvPath As String
+    CsvPath = FindTodaysCSV(ICOKURI_PC & FolderName(i))
     
-    If B2CsvPath <> "" Then
-        Call ImportICOKURI(B2CsvPath)
+    If CsvPath <> "" Then
+        Call ImportICOKURI(CsvPath)
     End If
 
 Next
@@ -119,7 +119,7 @@ Dim f As Object, TodayCSV As Object
 
 For Each f In FSO.GetFolder(CsvFolderPath).Files
 
-    If DateDiff("D", f.DateLastModified, DateValue(Date)) = 0 Then
+    If DateDiff("D", f.DateLastModified, DateValue(Date)) = 0 And f.Name Like "ICOKURI*" Then
     
         Set TodayCSV = f
         Exit For
@@ -129,8 +129,6 @@ For Each f In FSO.GetFolder(CsvFolderPath).Files
 Next
 
 If f Is Nothing Then
-    
-      MsgBox Prompt:=Replace(Mid(CsvFolderPath, InStr(CsvFolderPath, "B2ヤマトデータ")), "\", " ") & vbLf & "ICOKURIデータなし"
 
       Exit Function
       
