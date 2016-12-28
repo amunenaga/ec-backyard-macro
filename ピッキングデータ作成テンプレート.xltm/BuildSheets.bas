@@ -34,12 +34,12 @@ Sort.振分用シート_ソート
 
 '電算提出用保存 100番 棚有り
 Sheets("100番").Copy
-ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-2-3.xlsx"
+'ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-2-3.xlsx"
 ActiveWorkbook.Close
 
 '電算提出用保存 棚無し
 Sheets("棚無し").Copy
-ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-a.xlsx"
+'ActiveWorkbook.SaveAs Filename:=OUTPUT_FOLDER & "ヤフーPシート" & Format(Date, "MMdd") & "-a.xlsx"
 ActiveWorkbook.Close
 
 '振分け用シートの列幅調整
@@ -48,17 +48,29 @@ Call AdjustWidth
 'このファイルを保存
 Application.DisplayAlerts = False
 
-Const DEFAULT_XLSX_SAVE_PATH As String = "\\MOS10\Users\mos10\Desktop\ヤフー\ピッキング生成用過去ファイル\"
-
-If Dir(DEFAULT_XLSX_SAVE_PATH, vbDirectory) <> "" Then
-
-    ThisWorkbook.SaveAs Filename:=DEFAULT_XLSX_SAVE_PATH & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
-
-Else
+'擬似的なTry-Catchでファイルを保存する
+On Error Resume Next
+    
+    'Try
     Dim SavePath As String
-    SavePath = "C:" & Environ("HOMEPATH") & "\Desktop\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+    SavePath = Dir("\\MOS10\ヤフー\ピッキング生成用過去ファイル\", vbDirectory)
 
-End If
+        ThisWorkbook.SaveAs Filename:=SavePath & "ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+    
+    'catch
+    If Err Then
+        Err.Clear
+        ThisWorkbook.SaveAs Filename:="C:" & Environ("HOMEPATH") & "\Desktop\ヤフー\ピッキング生成用過去ファイル\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+    
+    'catch2
+    ElseIf Err Then
+            ThisWorkbook.SaveAs Filename:="C:" & Environ("HOMEPATH") & "\Desktop\ヤフー提出・振分け用" & Format(Date, "MMdd") & ".xlsx"
+            MsgBox "ヤフーフォルダが見つからなかったため、デスクトップへ保存しました。"
+    
+    End If
+
+'On Error Goto 0 宣言でErrは解除される
+On Error GoTo 0
 
 '振分け用商品リストのシート保護を再セット
 ForSorterSheet.Protect
