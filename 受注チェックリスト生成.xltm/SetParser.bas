@@ -32,18 +32,18 @@ For Each c In CodeRange
     '77777始まりセットコードなら
     If Code Like "77777*" Then
         
-        Call ParseTiedItem(Cells(c.Row, 2))
+        Call ParseTiedItem(c)
     
     '-02 -04 -120 ハイフン-数量 セットなら ハイフンを含みアルファベット始まりでない
     ElseIf InStr(Code, "-") > 1 And Not Code Like "[a-zA-Z]*" Then
         
-        Call ParseMultipleSet(Cells(c.Row, 2))
+        Call ParseMultipleSet(c)
     
     End If
 
 Next
 
-Call DeleteTiedItemRecord
+'Call DeleteTiedItemRecord
 
 End Sub
 Private Sub DeleteTiedItemRecord()
@@ -115,7 +115,7 @@ For i = 1 To ComponentItems.Count
     CodeCell.Offset(1, -1).Value = CodeCell.Offset(0, -1).Value
     
     '挿入後の行にE列以降の注文情報を入れる
-    CodeCell.Offset(1, 4).Resize(1, 11).Value = CodeCell.Offset(0, 4).Resize(1, 11).Value
+    CodeCell.Offset(1, 4).Resize(1, 14).Value = CodeCell.Offset(0, 4).Resize(1, 14).Value
     
 Next
 

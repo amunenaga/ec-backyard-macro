@@ -8,9 +8,9 @@ Dim CsvPath As String
 CsvPath = GetOrderCheckListPath()
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & CsvPath, Destination:=Range("$A$2"))
+    "TEXT;" & CsvPath, Destination:=Range("$A$1"))
     .Name = "受注チェックリスト詳細読込"
-    .FieldNames = False
+    .FieldNames = True
     .RowNumbers = False
     .FillAdjacentFormulas = False
     .PreserveFormatting = True
@@ -22,7 +22,7 @@ With ActiveSheet.QueryTables.Add(Connection:= _
     .RefreshPeriod = 0
     .TextFilePromptOnRefresh = False
     .TextFilePlatform = 932
-    .TextFileStartRow = 2
+    .TextFileStartRow = 1
     .TextFileParseType = xlDelimited
     .TextFileTextQualifier = xlTextQualifierDoubleQuote
     .TextFileConsecutiveDelimiter = False
@@ -33,14 +33,12 @@ With ActiveSheet.QueryTables.Add(Connection:= _
     .TextFileColumnDataTypes = Array(2, 2, 2, 1, 9, 9, 9, 2, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, _
     9, 9, 9, 9, 5, 5, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 2, 1, 2, 9, 9, 9, 9 _
     , 9, 9, 9, 2, 9, 9, 9, 2, 2, 2, 2, 2, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, _
-    9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 9, 9, 9)
+    9, 1, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 5, 9, 9, 9, 9, 9, 9, 9)
     .TextFileTrailingMinusNumbers = True
     .Refresh BackgroundQuery:=False
 End With
 
 ActiveWorkbook.Connections(1).Delete
-
-ActiveSheet.Shapes("ButtonExecuteMain").Delete
 
 '読み込み後、取込日の日付チェック 最初の注文行と最後の注文行の日付に対して
 
@@ -48,10 +46,12 @@ Dim LastRow As Long
 LastRow = Range("Q1").SpecialCells(xlCellTypeLastCell).Row
 
 
-'本日日付ならば、この処理は完了
-If DateDiff("D", Cells(2, 17).Value, DateValue(Date)) = 0 _
-    And DateDiff("D", Cells(LastRow, 17).Value, DateValue(Date)) = 0 Then
+'本日日付ならば、この処理は完了、取込日の18列目を調べる
+If DateDiff("D", Cells(2, 18).Value, DateValue(Date)) = 0 _
+    And DateDiff("D", Cells(LastRow, 18).Value, DateValue(Date)) = 0 Then
     
+    
+    ActiveSheet.Shapes("ButtonExecuteMain").Delete
     Exit Sub
 
 End If
@@ -59,7 +59,7 @@ End If
 
 '読込データが本日取込でなかった場合、続行可否をダイアログで決めてもらう。
 Dim ContinueWrongDate As VbMsgBoxResult
-    ContinueWrongDate = MsgBox(Buttons:=vbExclamation + vbYesNo, Prompt:="産直への取込日が本日ではありません。" & vbLf & "処理を続行しますか？" & vbLf & vbLf & "取込データ記載の取込日:" & Range("Q2").Value)
+    ContinueWrongDate = MsgBox(Buttons:=vbExclamation + vbYesNo, Prompt:="産直への取込日が本日ではありません。" & vbLf & "処理を続行しますか？" & vbLf & vbLf & "取込データ記載の取込日:" & Range("R2").Value & "日")
 
 If ContinueWrongDate = vbNo Then
     
@@ -78,6 +78,10 @@ If ContinueWrongDate = vbNo Then
             .OnAction = "生成のみ実行"
             .Characters.Text = "読込済データで処理を続行"
         End With
+          
+        ActiveSheet.Shapes("ButtonExecuteMain").Delete
+        
+        End
     
     End If
     

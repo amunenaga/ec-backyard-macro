@@ -18,22 +18,25 @@ Transfer.楽天商品名修正
 
 Transfer.提出用シートへ転記
 
-'提出ファイル保存
-Sheets("提出シート").Copy
-
+'取込、作業シート込みのエクセルファイルを保存
 Application.DisplayAlerts = False
-    ActiveWorkbook.SaveAs FileName:="提出" & Format(Date, "MMdd") & ".xlsx"
+    
+    ActiveWorkbook.SaveAs FileName:="受注チェックリスト" & Format(Date, "MMdd") & ".xlsx"
+    
+    '提出シートのみファイルを保存
+    'Sheets("提出シート").Copy
+
+    'ActiveWorkbook.SaveAs FileName:="提出" & Format(Date, "MMdd") & ".xlsx"
+
 Application.DisplayAlerts = True
 
+'セット商品リストブックを閉じる
 Dim w As Workbook
-
 For Each w In Workbooks
     If w.Name = "ｾｯﾄ商品ﾘｽﾄ.xls" Then w.Close False
 Next
 
-MsgBox "ファイル作成 完了"
-
-ThisWorkbook.Close False
+MsgBox "シート生成 完了"
 
 End Sub
 
@@ -49,20 +52,13 @@ Transfer.住所結合
 Transfer.JAN転記
 Transfer.楽天商品名修正
 
-
 Transfer.提出用シートへ転記
 
-'提出用ファイル
-Sheets("提出シート").Copy
-
 Dim w As Workbook
-
 For Each w In Workbooks
     If w.Name = "ｾｯﾄ商品ﾘｽﾄ.xls" Then w.Close False
 Next
 
 MsgBox "シート作成 完了" & vbLf & "ファイル名を指定して保存して下さい。"
-
-ThisWorkbook.Close False
 
 End Sub

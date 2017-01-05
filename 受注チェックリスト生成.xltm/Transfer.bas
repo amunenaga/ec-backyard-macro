@@ -12,7 +12,7 @@ Set FilteredRange = Range("A1").CurrentRegion
 
 '必要な列のレンジを指定
 Dim RequireColumns As Range
-Set RequireColumns = Columns("A:P")
+Set RequireColumns = Columns("A:Q")
 
 Dim TargetRange As Range
 
@@ -30,7 +30,7 @@ With Worksheets.Add
     .Columns("C").ColumnWidth = 40
     .Columns("K").ColumnWidth = 20
     .Columns("L").AutoFit
-    .Columns("M:P").ColumnWidth = 20
+    .Columns("M:Q").ColumnWidth = 20
     
 End With
 
@@ -134,8 +134,6 @@ Do
             Dim CampaignInfoCharEnd As Integer
             CampaignInfoCharEnd = InStr(1, ProductName, CloseBrackets(k)(1)) + 1
             
-            Debug.Assert CampaignInfoCharEnd = 0
-            
             Cells(i, 3) = Mid(ProductName, CampaignInfoCharEnd)
             
         End If
@@ -159,17 +157,22 @@ k = 2
 
 Do
 
-    '7777始まりは転記しない、作業シートでは削除済みだが、一応判定は残す
-    If Cells(i, 2).Value Like "77777*" Then GoTo Continue
+    '7777始まりは転記しない
+    If Cells(i, 3).Value Like "77777*" Then GoTo Continue
     
-    '1行分のレンジを定義
+    '1行分、商品コードと住所をコピー
     Dim Record As Range
     Set Record = Range(Cells(i, 1), Cells(i, 5))
-    
     Set Record = Union(Record, Range(Cells(i, 7), Cells(i, 13)))
     
-    '行をコピー、コピー先行カウンタをインクリメント
     Record.Copy Worksheets("提出シート").Cells(k, 1)
+    
+    '受注メモ＝モール受注番号と明細枝番をコピー
+    Dim Record2 As Range
+    Set Record2 = Union(Cells(i, 6), Cells(i, 19))
+    Record2.Copy Worksheets("提出シート").Cells(k, 13)
+    
+    'コピー先行カウンタをインクリメント
     k = k + 1
 
 Continue:
