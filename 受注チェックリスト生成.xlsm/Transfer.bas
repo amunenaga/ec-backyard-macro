@@ -146,7 +146,7 @@ Loop Until IsEmpty(Cells(i, 1))
 
 End Sub
 
-Sub 提出用シートへ転記()
+Sub アップロード用シートへ転記()
 
 Worksheets("作業シート").Activate
 
@@ -165,12 +165,12 @@ Do
     Set Record = Range(Cells(i, 1), Cells(i, 5))
     Set Record = Union(Record, Range(Cells(i, 7), Cells(i, 13)))
     
-    Record.Copy Worksheets("提出シート").Cells(k, 1)
+    Record.Copy Worksheets("アップロードシート").Cells(k, 1)
     
     '受注メモ＝モール受注番号と明細枝番をコピー
     Dim Record2 As Range
     Set Record2 = Union(Cells(i, 6), Cells(i, 19))
-    Record2.Copy Worksheets("提出シート").Cells(k, 13)
+    Record2.Copy Worksheets("アップロードシート").Cells(k, 13)
     
     'コピー先行カウンタをインクリメント
     k = k + 1
@@ -180,6 +180,6 @@ Continue:
     
 Loop Until IsEmpty(Cells(i, 1))
 
-Worksheets("提出シート").Activate
+Worksheets("アップロードシート").Activate
 
 End Sub
