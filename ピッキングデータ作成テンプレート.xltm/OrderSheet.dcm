@@ -13,25 +13,29 @@ Private Sub Worksheet_Change(ByVal Target As Range)
     Dim LastRow As Long
     LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 
-
     Dim CheckCell As Range
     Set CheckCell = Intersect(Target, Cells(LastRow, 28))
     
-    If Not CheckCell Is Nothing Then
-        If CheckCell.Value = "" Then
+    If CheckCell Is Nothing Then Exit Sub
+    
+    If CheckCell.Value = "" Then Exit Sub
 
-            Exit Sub
+    Application.StatusBar = False
+    
+    Dim IsContinue As Integer
+    IsContinue = MsgBox("アドイン完了、ファイルを作成します。", vbOKCancel)
+    
+    If IsContinue = vbOK Then
+    
+        Call BuildSheets.電算提出_振分けシート作成
+    
+    Else
+    
+        MsgBox "マクロを終了します。"
+        SetParser.CloseDataBook
         
-        Else
-
-            Application.StatusBar = False
+        End
     
-            MsgBox "アドイン完了、ファイルを作成します。"
-    
-            Call BuildSheets.電算提出_振分けシート作成
-
-        End If
-
     End If
 
 End Sub
