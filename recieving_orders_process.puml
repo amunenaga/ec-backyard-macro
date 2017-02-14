@@ -1,4 +1,4 @@
-@startuml recieving_orders_process
+@startuml /uml/recieving_orders_process
 
 skinparam monochrome true
 
