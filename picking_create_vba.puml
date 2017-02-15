@@ -12,9 +12,12 @@ end box
 
 participant Main
 
-Main -> FetchCsv : マクロ起動
+[-> Main : マクロ起動
 activate Main
+
+Main -> FetchCsv : 呼出
 activate FetchCsv
+
 CSV <- FetchCsv : TextStreamingOpen 
 
 participant SetParser
@@ -45,7 +48,7 @@ Loop 1行ずつ読み出し
 CSV <- FetchCsv : TextStreamingClose
 deactivate FetchCsv
 
-... <size:28>アドイン 台帳作成 実行</size> ...
+... <size:28>アドインでデータ取得 手動実行</size> ...
 
 participant LocationCutter
 
@@ -114,6 +117,9 @@ deactivate SheetBuilder
 
 Main --> ForSorter1 : VBA:PrintOut 
 Main --> ForSorter2 : VBA:PrintOut
+
+
+[<- Main : 終了メッセージ
 
 deactivate Main
 
