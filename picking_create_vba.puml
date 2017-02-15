@@ -1,0 +1,98 @@
+@startuml picking_create_vba
+
+skinparam monochrome true
+skinparam packageFontSize 25
+
+title ピッキングテンプレートVBA
+
+entity CSV
+entity ｾｯﾄ商品ﾘｽﾄ.xls
+
+
+CSV <- FetchCsv : TextStreamingOpen 
+
+participant SetParser
+participant Main
+
+activate Main
+FetchCsv <- Main
+
+Loop 1行ずつ読み出し
+activate FetchCsv
+    CSV -> FetchCsv : 1Line
+
+    entity OrdersSheet
+    FetchCsv -> OrdersSheet : 受注データ書込
+
+    SetParser <- OrdersSheet : セット分解
+    activate SetParser
+        ｾｯﾄ商品ﾘｽﾄ.xls <- SetParser : GetComponentItems()
+        ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : ItemCollection
+    
+        SetParser -> OrdersSheet : アイテム行挿入
+    
+    deactivate SetParser
+
+    SetParser <- OrdersSheet :○個組分解
+    activate SetParser
+        SetParser -> OrdersSheet : 単体数量上書
+    deactivate SetParser
+
+    end loop
+
+CSV <- FetchCsv : TextStreamingClose
+deactivate FetchCsv
+
+destroy FetchCsv
+
+
+note over OrderSheet : 商魂アドイン \n台帳出力 
+... アドイン実行 ...
+
+participant LocationCutter
+
+    loop ロケーション文字列修正
+
+        OrdersSheet -> LocationCutter :ロケ文字列取得
+        activate LocationCutter
+
+            OrdersSheet <- LocationCutter :無効ロケ削除
+
+        deactivate LocationCutter
+
+    end
+
+participant SheetBuilder
+
+OrdersSheet -> SheetBuilder
+activate SheetBuilder
+     
+    Group ピッキングデータ作成
+    else 棚有り
+        create entity Picking_2_3
+        SheetBuilder -> Picking_2_3
+    else 棚無し
+        create entity Picking_a
+        SheetBuilder -> Picking_a
+    end
+
+    Main -> Picking_2_3 : ファイル保存
+    destroy Picking_2_3
+
+    Main -> Picking_a : ファイル保存
+    destroy Picking_a
+
+
+    alt 単体受注品
+        create entity ForSorter1
+        SheetBuilder -> ForSorter1
+    else セット商品
+        create entity ForSorter2
+        SheetBuilder -> ForSorter2
+    end
+
+deactivate SheetBuilder
+
+deactivate Main
+
+@enduml
