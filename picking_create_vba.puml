@@ -69,7 +69,7 @@ participant LocationCutter
 
     activate LocationCutter
 
-    loop ロケーション文字列修正
+    loop 受注データFix
         |||
         OrdersSheet -> LocationCutter :ロケ文字列取得
         OrdersSheet <- LocationCutter :無効ロケ削除
@@ -93,8 +93,10 @@ loop 3モール分実行
 
         OrdersSheet <- SheetBuilder : 受注データ取得
 
+        SheetBuilder -> SheetBuilder : 受注モール判定
+
         else 棚有り
-            SheetBuilder -> Picking_2_3 : データ転記
+            SheetBuilder -> Picking_2_3 : 6ケタ振替 データ転記
 
         else 棚無し
             SheetBuilder -> Picking_a : データ転記
@@ -112,8 +114,8 @@ loop 3モール分実行
         SheetBuilder -> ForSorter1 : シート作成
         create entity ForSorter2
         SheetBuilder -> ForSorter2 : シート作成
-
         OrdersSheet <- SheetBuilder : 受注データ取得
+        SheetBuilder -> SheetBuilder : 受注モール判定
 
         else 単体受注品
 
