@@ -164,7 +164,7 @@ Do
     Order(2) = Range("E" & i).Value '商品名
     Order(3) = Range("F" & i).Value '数量
     Order(4) = Range("G" & i).Value '販売価格
-    Order(5) = Range("G" & i).Value '現在庫
+    Order(5) = Range("Q" & i).Value '現在庫
     Order(6) = Range("H" & i).Value '有効ロケーション
     
     

@@ -13,6 +13,9 @@ Private Sub Worksheet_Change(ByVal Target As Range)
 'アドインで書き込まれる最終列、最終行の変更を検出する
 'WorkSheet_Changeイベントは変更があったセルを引数にとる。
 
+'I1セルが空欄なら、アドイン前なので終了
+If Range("I1").Value = "" Then Exit Sub
+
 Dim LastRow As Long
 LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 

@@ -195,17 +195,16 @@ SeparatedCode = Split(Code, "-", 2)
 '変換可能なら、○個セットと見なす
 
 If Not IsNumeric(SeparatedCode(1)) Then
+    r.Offset(0, 1).Value = SeparatedCode(0)
     Exit Sub
 End If
 
 'セットなら、D列は単体コード、数量はセット数量×受注数量
-r.NumberFormatLocal = "@"
-r.Value = CStr(SeparatedCode(0))
+r.Offset(0, 1).NumberFormatLocal = "@"
+r.Offset(0, 1).Value = CStr(SeparatedCode(0))
 
 Range("F" & r.Row).Value = Range("F" & r.Row).Value * CLng(Val(SeparatedCode(1)))
 
-'備考に、セット分解済記入
-Range("K" & r.Row).Value = Range("K" & r.Row).Value & "セット分解 済"
 
 End Sub
 

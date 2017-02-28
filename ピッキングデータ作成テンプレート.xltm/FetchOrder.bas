@@ -72,7 +72,7 @@ Do Until TS.AtEndOfStream
         
 
         'セット分解 7777始まり
-        If .Range("D" & i).Value Like "7777*" Then
+        If .Range("C" & i).Value Like "7777*" Then
             
             Call SetParser.ParseItems(.Range("D" & i))
             
@@ -84,9 +84,9 @@ Do Until TS.AtEndOfStream
     
         '単体○個セット分解 ハイフン含むコードなら分解処理へ投げる
         
-        If .Range("D" & i).Value Like "*-*" Then
+        If .Range("C" & i).Value Like "*-*" Then
         
-            Call SetParser.ParseScalingSet(.Range("D" & i))
+            Call SetParser.ParseScalingSet(.Range("C" & i))
         
         End If
     
