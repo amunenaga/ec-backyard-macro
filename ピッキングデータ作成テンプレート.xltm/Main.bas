@@ -4,7 +4,7 @@ Sub 受注ファイル読込()
 
 OrderSheet.Activate
 
-If Not Range("B2").Value = "" Then
+If Not Range("A2").Value = "" Then
     MsgBox "データ取得済です。"
     End
 End If
@@ -17,63 +17,31 @@ With ShowProgress
     .Show vbModeless
 End With
 
-ShowProgress.ProgressBar.Value = 2
-ShowProgress.StepMessageLabel = "CSVファイル探索中"
+Dim CsvPath As String
+CsvPath = Application.GetOpenFilename(Title:="CSVを指定", FileFilter:="クロスモールCSV,*.csv", FilterIndex:="2")
 
-'ファイル操作オブジェクト生成
-Dim FSO As New FileSystemObject
-
-' Meisai.csvとtyumon_H.csvのCSVファイルのパスをセット
-'明細と注文ヘッダーのあるフォルダを指定、最後必ず\マーク
-Const CSV_PATH As String = "C:\Users\mos10\Desktop\ヤフー\"
-Const ALTER_CSV_PATH As String = "\\MOS10\ヤフー\"
-
-Dim MeisaiPath As String, TyumonhPath As String
-
-If FSO.FileExists(CSV_PATH & "Meisai.csv") Then
-
-    MeisaiPath = CSV_PATH & "Meisai.csv"
-    TyumonhPath = CSV_PATH & "tyumon_H.csv"
-
-ElseIf FSO.FileExists(ALTER_CSV_PATH & "Meisai.csv") Then
-   
-    MeisaiPath = ALTER_CSV_PATH & "Meisai.csv"
-    TyumonhPath = ALTER_CSV_PATH & "tyumon_H.csv"
-
-Else
-    
-    MsgBox "meisai.csv ファイルなし。" & vbLf & "meisaiファイルを指定して下さい。"
-    MeisaiPath = Application.GetOpenFilename(Title:="meisaiを指定", FileFilter:="meisai,*.csv")
-    
-    MsgBox "tyumon_Hファイルを選択して下さい。"
-    TyumonhPath = Application.GetOpenFilename(Title:="tyumon_Hを指定", FilterIndex:="tyumon_H,*.csv")
-
-    If MeisaiPath = "" Or TyumonhPath = "" Then
-        MsgBox "ファイル指定がキャンセルされました。" & vbLf & "マクロを終了します。"
-        End
-    End If
-
+If CsvPath = "" Then
+    MsgBox "ファイル指定がキャンセルされました。" & vbLf & "マクロを終了します。"
+    End
 End If
 
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "CSV読込中"
 
-Call ReadMeisai(MeisaiPath)
-
-Call ReadTyumonH(TyumonhPath)
+Call ReadClossMallCsv(CsvPath)
 
 ShowProgress.ProgressBar.Value = 4
 ShowProgress.StepMessageLabel = "CSV読込完了"
 
 'マクロ起動ボタンを消去
-OrderSheet.Shapes(1).Delete
+'OrderSheet.Shapes(1).Delete
 
 'アドイン用の行・列 表示
 Dim LastRow As Long
 LastRow = Range("D1").SpecialCells(xlCellTypeLastCell).Row
 
-Range("I1").Value = "アドイン指定 台帳：9998"
-Range("I2:L2") = Array(2, 4, LastRow, 9)
+Range("L1").Value = "アドイン指定 台帳：9998"
+Range("L2:O2") = Array(2, 9, LastRow, 12)
 
 ShowProgress.Hide
 
@@ -119,7 +87,7 @@ OrderSheet.Protect
 'モール毎の電算室提出データ保存、振分けシート作成
 Dim Mall As Variant, Malls As Variant
 
-Malls = Array("ヤフー")
+Malls = Array("ヤフー", "楽天", "Amazon")
 
 For Each Mall In Malls
 
@@ -128,7 +96,7 @@ For Each Mall In Malls
     ShowProgress.StepMessageLabel = Mall & "データ処理中"
     
     'ピッキングシート作成・保存
-    Call BuildSheets.OutputPickingData(CStr(Mall))
+    'Call BuildSheets.OutputPickingData(CStr(Mall))
     
     '振分け用シート作成
     Call BuildSheets.CreateSorterSheet(CStr(Mall))
@@ -153,20 +121,10 @@ ShowProgress.StepMessageLabel = Mall & "保存処理中"
 On Error Resume Next
     
     'Try
-    'サーバー02の所定のフォルダへ保存…テストベッドのヤフー用はMOS10\デスクトップの所定フォルダ。
-    ThisWorkbook.SaveAs FileName:="C:" & Environ("HOMEPATH") & "\Desktop\ヤフー\ピッキング生成用過去ファイル\" & PutFileName
+     ThisWorkbook.SaveAs FileName:="C:" & Environ("HOMEPATH") & "\Desktop\" & PutFileName
     
     'catch
     If Err Then
-    'サーバー02へ繋がらないときは、実行PCのデスクトップへ保存
-        Err.Clear
-        ThisWorkbook.SaveAs FileName:="C:" & Environ("HOMEPATH") & "\Desktop\" & PutFileName
-
-    End If
-    
-    'catch2
-    If Err Then
-        Err.Clear
         MsgBox "ファイルを保存できませんでした。手動で名前を付けて保存してください。"
     End If
 
@@ -182,7 +140,7 @@ ShowProgress.StepMessageLabel = Mall & "振分シート プリント"
 Dim i As Long
 For i = 2 To Worksheets.Count
 
-    Worksheets(i).PrintOut
+    'Worksheets(i).PrintOut
 
 Next
 

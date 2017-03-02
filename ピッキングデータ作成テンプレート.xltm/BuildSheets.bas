@@ -7,7 +7,7 @@ Sub CreateSorterSheet(Mall As String)
 Worksheets("振分用テンプレート").Copy after:=Worksheets(Worksheets.Count)
 With ActiveSheet
     .Name = Mall & "_振分用"
-    .PageSetup.LeftHeader = Format(Date, "M/dd") & " " & Mall
+    .PageSetup.RightHeader = Format(Date, "M/dd") & " " & Mall
 End With
 Dim ForSorterSheet As Worksheet
 Set ForSorterSheet = ActiveSheet
@@ -16,7 +16,7 @@ Set ForSorterSheet = ActiveSheet
 Worksheets("振分用テンプレート").Copy after:=Worksheets(Worksheets.Count)
 With ActiveSheet
     .Name = Mall & "_振分用-セット"
-    .PageSetup.LeftHeader = Format(Date, "M/dd") & " " & Mall & "-セット商品"
+    .PageSetup.RightHeader = Format(Date, "M/dd") & " " & Mall & "-セット商品"
 End With
 Dim ForSorterSetItemSheet As Worksheet
 Set ForSorterSetItemSheet = ActiveSheet
