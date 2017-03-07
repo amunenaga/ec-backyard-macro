@@ -49,8 +49,6 @@ For i = 1 To d.Count
     
     '単体商品コードと必要数量書き込み
     c.Offset(1, 3).Value = v.Quantity * c.Offset(0, 3).Value
-    
-    c.Offset(1, 7).Value = v.Code
     c.Offset(1, 8).Value = v.Quantity * c.Offset(0, 3).Value
     
     '1個目のアイテムにのみ販売価格を付け替える
@@ -87,7 +85,7 @@ Private Function GetComponentItems(TiedCode As String) As Collection
 '渡されたコードから、セット内容Collectionを返します。
 'セット商品リストは呼び出し側のプロシージャで開いているものとします。
 
-'セット商品リストのブックを取得する
+'セット商品リストから該当コードのあるシートと行を探す
 
 Dim i As Long
 For i = 1 To Workbooks(TIED_ITEM_LIST_BOOK).Worksheets.Count
@@ -175,7 +173,7 @@ ret:
 
 End Sub
 
-Function CloseSetMasterBook(Optional ByVal Arg As Variant) As Boolean
+Function CloseSetMasterBook(Optional ByVal arg As Variant) As Boolean
 
 Dim wb As Workbook
 

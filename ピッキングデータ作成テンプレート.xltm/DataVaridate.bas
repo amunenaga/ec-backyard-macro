@@ -12,11 +12,9 @@ LastRow = Range("A1").SpecialCells(xlCellTypeLastCell).Row
 For i = 2 To LastRow
     
     'ÉçÉPÅ[ÉVÉáÉìèCê≥
-    Cells(i, 8).Value = CutOffUnlocation(Cells(i, 18).Value)
+    Cells(i, 11).Value = CutOffUnlocation(Cells(i, 15).Value)
 
 Next
-
-'Columns("M:AB").Delete
 
 End Function
 
@@ -26,8 +24,16 @@ Private Function CutOffUnlocation(Location As String) As String
 Dim Reg As New RegExp
 
 Reg.Global = True
-Reg.Pattern = "\[[0-3|\s]\-[0-3|\s]\-[0|\s]\-[0|\s]\-[0|\s]\]"
+Reg.Pattern = "\[\d00:[0|\s]\-[0|\s]\-[0|\s]\-[0|\s]\-[0|\s]\]"
 
 CutOffUnlocation = Reg.Replace(Location, "")
 
 End Function
+
+Private Function CutCampaignWord(Name As String) As String
+
+
+
+End Function
+
+

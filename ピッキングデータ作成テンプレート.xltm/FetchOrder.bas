@@ -51,9 +51,9 @@ Do Until TS.AtEndOfStream
         .Quantity = Col(3)
         .Price = Col(4)
                 
-        .MallName = Col(8)
+        .MallName = Col(9)
         .Addressee = Col(10)
-        .OrderId = Col(13)
+        .OrderId = Col(14)
 
     End With
     
@@ -90,52 +90,54 @@ End Sub
 
 Sub WriteSheet(ByRef Order As RawOrder)
 '注文データの配列を受け取って、最終行の直下へ追記
-    With Worksheets("受注データシート")
+
+With Worksheets("受注データシート")
+
+    Dim WriteRow As Long
+    WriteRow = .Range("A1").SpecialCells(xlCellTypeLastCell).Row + 1
     
-        Dim WriteRow As Long
-        WriteRow = .Range("A1").SpecialCells(xlCellTypeLastCell).Row + 1
-        
-        'A列 クロスモール連番
-        .Range("A" & WriteRow).NumberFormatLocal = "@"
-        .Range("A" & WriteRow).Value = Order.Serial
-        
-        'B列、受注時の商品コード
-        .Range("B" & WriteRow).NumberFormatLocal = "@"
-        .Range("B" & WriteRow).Value = Order.Code
-        
-        
-        'C列：商品名  D列：売価   E列：受注数量  F列：受注番号 G列：モール名  H列：お届け先名
-        .Range("C" & WriteRow).Value = Order.ProductName
-        .Range("D" & WriteRow).Value = Order.Price
-        .Range("E" & WriteRow).Value = Order.Quantity
-        .Range("F" & WriteRow).Value = Order.OrderId
-        .Range("G" & WriteRow).Value = Order.MallName
-        .Range("H" & WriteRow).Value = Order.Addressee
-        
-        'I列、アドイン実行用に6ケタ化したコード、もしくはJAN
-        '空欄がありえるので、ピッキングデータ・振分リストに転記時に空欄判定する
-        .Range("I" & WriteRow).NumberFormatLocal = "@"
-        
-        '6ケタならそのまま入れる
-        If Order.Code Like String(6, "#") Then
-            .Range("I" & WriteRow).Value = Order.Code
-        
-        '数字5ケタは頭にゼロを追記
-        ElseIf Order.Code Like String(5, "#") Then
-            
-            .Range("I" & WriteRow).Value = "0" & Order.Code
-        
-        'JANもそのまま入れる
-        ElseIf Order.Code Like String(13, "#") Then
-            
-            .Range("I" & WriteRow).Value = Order.Code
-        
-        End If
+    'A列 クロスモール連番
+    .Range("A" & WriteRow).NumberFormatLocal = "@"
+    .Range("A" & WriteRow).Value = Order.Serial
     
-        'J列 必要数量 6ケタ/JANに対して必要な数量
-        'セット分解後に書き換えられるので、一旦受注数量を入れる。
-        .Range("J" & WriteRow).Value = Order.Quantity
+    'B列、受注時の商品コード
+    .Range("B" & WriteRow).NumberFormatLocal = "@"
+    .Range("B" & WriteRow).Value = Order.Code
     
-    End With
+    
+    'C列：商品名  D列：売価   E列：受注数量  F列：受注番号 G列：モール名  H列：お届け先名
+    .Range("C" & WriteRow).Value = Order.ProductName
+    .Range("D" & WriteRow).Value = Order.Price
+    .Range("E" & WriteRow).Value = Order.Quantity
+    .Range("F" & WriteRow).Value = Order.OrderId
+    .Range("G" & WriteRow).Value = Order.MallName
+    .Range("H" & WriteRow).Value = Order.Addressee
+    
+    'I列、アドイン実行用に6ケタ化したコード、もしくはJAN
+    '空欄がありえるので、ピッキングデータ・振分リストに転記時に空欄判定する
+    .Range("I" & WriteRow).NumberFormatLocal = "@"
+    
+    '6ケタならそのまま入れる
+    If Order.Code Like String(6, "#") Then
+        .Range("I" & WriteRow).Value = Order.Code
+    
+    '数字5ケタは頭にゼロを追記
+    ElseIf Order.Code Like String(5, "#") Then
+        
+        .Range("I" & WriteRow).Value = "0" & Order.Code
+    
+    'JANもそのまま入れる
+    ElseIf Order.Code Like String(13, "#") Then
+        
+        .Range("I" & WriteRow).Value = Order.Code
+    
+    End If
+
+    'J列 必要数量 6ケタ/JANに対して必要な数量
+    'セット分解後に書き換えられるので、一旦受注数量を入れる。
+    .Range("J" & WriteRow).Value = Order.Quantity
+
+End With
+
 End Sub
 
