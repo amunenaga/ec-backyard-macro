@@ -17,24 +17,18 @@ With ShowProgress
     .Show vbModeless
 End With
 
-Dim CsvPath As String
-CsvPath = Application.GetOpenFilename(Title:="CSVを指定", FileFilter:="クロスモールCSV,*.csv", FilterIndex:="2")
-
-If CsvPath = "False" Then
-    MsgBox "ファイル指定がキャンセルされました。" & vbLf & "マクロを終了します。"
-    End
-End If
-
 'マクロ起動ボタンを消去
 'OrderSheet.Shapes(1).Delete
 
 ShowProgress.ProgressBar.Value = 2
 ShowProgress.StepMessageLabel = "CSV読込中"
 
-Call ReadClossMallCsv(CsvPath)
+Call LoadCsv
 
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "ロケーションデータ取得中"
+Application.Wait Now + TimeValue("00:00:01")
+'1秒待機してプログレスバーを更新
 
 Call ConnectDB.Make_List
 
@@ -75,17 +69,21 @@ PutFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
 ShowProgress.ProgressBar.Value = 7
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
 
+
+    Dim DeskTop As String, SavePath As String
+    DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop")
+    
+    If Dir(DeskTop & "\" & PutFileName) <> "" Then
+        PutFileName = Replace(PutFileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "AM/PMhhmm"))
+    End If
+    
 '擬似的なTry-Catchで保存
 On Error Resume Next
     
-    'Try
-    Dim DeskTop As String
-    DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop")
     ThisWorkbook.SaveAs Filename:=DeskTop & "\" & PutFileName, FileFormat:=xlWorkbookDefault
-    
     'catch
     If Err Then
-        MsgBox "ファイルを保存できませんでした。手動で名前を付けて保存してください。"
+        MsgBox "ファイルを保存できませんでした。処理完了後に場所を指定して保存してください。"
     End If
 
 'On Error Goto 0 宣言でErrは解除される

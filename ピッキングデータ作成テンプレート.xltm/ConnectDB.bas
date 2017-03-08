@@ -1,5 +1,6 @@
 Attribute VB_Name = "ConnectDB"
 Sub Make_List(Optional ByVal arg As Boolean)
+'ì¬F¤•i•”
 
 'SQLŒn•Ï”
 Dim DB_Cnn As New ADODB.Connection

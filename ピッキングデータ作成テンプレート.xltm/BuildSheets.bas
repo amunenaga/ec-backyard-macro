@@ -36,14 +36,14 @@ k = 2
 Do
 
     '引数で渡されたモール以外は飛ばす
-    If Not Range("G" & i).Value Like (MallName & "*") Then GoTo Continue
+    If Not Range("F" & i).Value Like (MallName & "*") Then GoTo Continue
 
     '配列に行を格納
     Order(0) = CStr(Range("B" & i).Value) '受注時コード
     Order(1) = Range("C" & i).Value '商品名
-    Order(2) = Range("E" & i).Value '受注数量
+    Order(2) = Range("D" & i).Value '受注数量
     Order(3) = CStr(Range("L" & i).Value) 'JAN
-    Order(4) = Range("H" & i).Value 'お届け先名
+    Order(4) = Range("G" & i).Value 'お届け先名
     Order(5) = Range("N" & i).Value '現在庫
     
     
@@ -219,24 +219,36 @@ End Sub
 Private Function PreparePickingBook(BookName As String) As Workbook
 'ブック名を変えるために、所定の場所へ先にデータなしで保存する
 
+'引数の名前で新規ブックを作成する
 ThisWorkbook.Worksheets("ピッキングシート提出用テンプレート").Copy
-
 ActiveSheet.Name = BookName
 
-'ファイル保存処理
-
+'一旦新規作成ブックを保存することでブック名を変更する
+'新規作成ファイルの保存時はファイルフォーマットを明示する必要な模様
+    Dim SavePath As String
     Const PICKING_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\クロスモールテスト\"
     
     If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
-        ActiveWorkbook.SaveAs Filename:=PICKING_FOLDER & BookName, FileFormat:=xlWorkbookDefault
-
+        '既に本日ファイルがあれば、時刻付けて保存
+        If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
+            SavePath = PICKING_FOLDER & BookName
+        Else
+            SavePath = PICKING_FOLDER & BookName & "-" & Format(Time, "AM/PMhhmm")
+        End If
+            ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
     Else
+        
         MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
         
-        Dim DeskTop As String
-        DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName & ".xlsx"
-        ActiveWorkbook.SaveAs Filename:=DeskTop, FileFormat:=xlWorkbookDefault
-                
+        Dim DeskTopPath As String
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
+        
+        If Dir(DeskTopPath & ".xlsx") <> "" Then
+            DeskTopPath = DeskTopPath & "-" & Format(Time, "AM/PMhhmm")
+        End If
+    
+        ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
+    
     End If
 
 Set PreparePickingBook = ActiveWorkbook

@@ -20,62 +20,59 @@ Call InsertComponetRow(r, ComponentItems)
 
 End Sub
 
-Private Sub InsertComponetRow(c As Range, d As Collection)
+Private Sub InsertComponetRow(c As Range, ComponentItems As Collection)
 
-Dim i As Long, v As Variant
+Dim i As Long
+For i = 1 To ComponentItems.Count
+    
+    Dim Record As Range
+    Set Record = Range(Cells(c.Row, 1), Cells(c.Row, 15))
+    
+    '一旦セット品の行をコピー
+    Record.Copy
+    Record.Offset(1, 0).Insert (xlShiftDown)
+    
+    '挿入した行を示す行番号
+    Dim wr As Long
+    wr = c.Row + 1
+    
+    '挿入後の行をセット内容の商品情報で書き換える
+    Dim Component As Variant
+    Set Component = ComponentItems.Item(i)
+    
+    'アドイン用のコードは6ケタあれば6ケタ、なければJANで上書き
+    If Component.Code <> "" Then
 
-For i = 1 To d.Count
-    
-    Rows(c.Offset(1, 0).Row).Insert (xlShiftDown)
-    
-    Set v = d.Item(i)
-    
-    '6ケタあれば6ケタ、なければJAN
-    c.Offset(1, 0).NumberFormatLocal = "@"
-    c.Offset(1, 0).Value = c.Value
-    
-    If v.Code <> "" Then
-
-        c.Offset(1, 7).Value = v.Code
+        Cells(wr, 9).Value = Component.Code
     
     Else
     
-        c.Offset(1, 7).Value = v.Jan
+        Cells(wr, 9).Value = Component.Jan
     
     End If
     
-    '商品名書き込み
-    c.Offset(1, 1).Value = v.Name
+    '商品名上書き
+    Cells(wr, 3).Value = Component.Name
     
-    '単体商品コードと必要数量書き込み
-    c.Offset(1, 3).Value = v.Quantity * c.Offset(0, 3).Value
-    c.Offset(1, 8).Value = v.Quantity * c.Offset(0, 3).Value
+    '数量と必要数量上書き
+    Cells(wr, 4).Value = Component.Quantity * Cells(c.Row, 4).Value
+    Cells(wr, 10).Value = Component.Quantity * Cells(c.Row, 4).Value
     
     '1個目のアイテムにのみ販売価格を付け替える
     '売価転記済フラグ
     Dim Flg As Boolean
     
-    If v.Quantity = 1 And Flg = False Then
+    If Component.Quantity = 1 And Flg = False Then
     
-        c.Offset(1, 2).Value = c.Offset(0, 2).Value
-        c.Offset(0, 2).Value = 0
+        Cells(wr, 5) = Cells(c.Row, 5).Value
+        Cells(c.Row, 5).Value = 0
                 
         Flg = True
         
     Else
-        c.Offset(1, 2).Value = 0
+        Cells(c.Row, 5).Value = 0
         
     End If
-    
-    '挿入後の行に、受注時コードはセットの7777コードを入れる
-    c.Offset(1, 0).Value = c.Value
-    
-    '同じく、挿入後の行に注文番号を入れる
-    c.Offset(1, -1).Value = c.Offset(0, -1).Value
-    
-    c.Offset(1, 4).Value = c.Offset(0, 4).Value
-    c.Offset(1, 5).Value = c.Offset(0, 5).Value
-    c.Offset(1, 6).Value = c.Offset(0, 6).Value
     
 Next
 
