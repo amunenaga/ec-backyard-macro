@@ -2,11 +2,18 @@ Attribute VB_Name = "LoadOrderCsv"
 Option Explicit
 
 Sub LoadCsv(Optional ByVal bool As Boolean)
+'クロスモールからダウンロードしたCSV読込
 
-Worksheets("受注データシート").Activate
+'フォルダを指定してファイル指定ダイアログからファイル指定
+Const CSV_DL_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\クロスモールテスト"
 
 Dim FilePath As String
-FilePath = Application.GetOpenFilename(Title:="CSVを指定", FileFilter:="クロスモールCSV,*.csv", FilterIndex:="2")
+
+'カレントフォルダを移動して梱包室データフォルダでファイル指定ダイアログを開く
+'@url http://officetanaka.net/other/extra/tips15.htm
+CreateObject("WScript.Shell").CurrentDirectory = CSV_DL_FOLDER
+
+FilePath = Application.GetOpenFilename("クロスモールCSV,*.csv", 2, "クロスモールのピッキングCSVを指定")
 
 If FilePath = "False" Then
     MsgBox "ファイル指定がキャンセルされました。" & vbLf & "マクロを終了します。"
@@ -50,7 +57,7 @@ Call SetParse
 
 ActiveWorkbook.Connections(1).Delete
 
-End Sub
+End Function
 
 Private Sub FixForAddin()
 Dim CodeRange As Range, c As Range

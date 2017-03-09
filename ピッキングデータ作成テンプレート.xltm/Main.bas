@@ -63,27 +63,37 @@ Application.DisplayAlerts = False
 'Worksheets("振分用テンプレート").Delete
 
 'このファイルを保存
-Dim PutFileName As String
-PutFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
+
 
 ShowProgress.ProgressBar.Value = 7
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
 
+Dim DeskTop As String, PutFileName As String, SavePath As String
+Const SAVE_PATH = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ"
 
-    Dim DeskTop As String, SavePath As String
-    DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop")
-    
-    If Dir(DeskTop & "\" & PutFileName) <> "" Then
-        PutFileName = Replace(PutFileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "AM/PMhhmm"))
-    End If
+PutFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
+
+'当日8時取込分のタイムスタンプ無しファイルがないか確認
+If Dir(SAVE_PATH & PutFileName) <> "" Then
+    PutFileName = Format(Time, "hh:mm") & PutFileName
+End If
     
 '擬似的なTry-Catchで保存
 On Error Resume Next
     
-    ThisWorkbook.SaveAs Filename:=DeskTop & "\" & PutFileName, FileFormat:=xlWorkbookDefault
+    ThisWorkbook.SaveAs Filename:="\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ", FileFormat:=xlWorkbookDefault
+    
     'catch
     If Err Then
-        MsgBox "ファイルを保存できませんでした。処理完了後に場所を指定して保存してください。"
+        Err.Clear
+        MsgBox "ネット販売関連に繋がりませんでした、デスクトップへ保存します。"
+        Dim DeskTop As String, SavePath As String
+        DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop")
+    
+        If Dir(DeskTop & "\" & PutFileName) <> "" Then
+            PutFileName = Replace(PutFileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "AM/PMhhmm"))
+        End If
+    
     End If
 
 'On Error Goto 0 宣言でErrは解除される

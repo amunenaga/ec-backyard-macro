@@ -233,20 +233,22 @@ ActiveSheet.Name = BookName
         If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
             SavePath = PICKING_FOLDER & BookName
         Else
-            SavePath = PICKING_FOLDER & BookName & "-" & Format(Time, "AM/PMhhmm")
+            SavePath = PICKING_FOLDER & Format(Time, "hh:mm") & BookName
         End If
+        
             ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
+    
     Else
         
-        MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
-        
         Dim DeskTopPath As String
-        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
-        
-        If Dir(DeskTopPath & ".xlsx") <> "" Then
-            DeskTopPath = DeskTopPath & "-" & Format(Time, "AM/PMhhmm")
+        If Dir(DeskTopPath & BookName & ".xlsx") = "" Then
+            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
+        Else
+            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hh:mm") & BookName
         End If
-    
+        
+        MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"
+            
         ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
     
     End If
