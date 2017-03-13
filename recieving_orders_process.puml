@@ -33,6 +33,7 @@ deactivate CROSSMALL
 Boundary ピッキングシート生成
 database 商品マスタ
 
+Boundary 受注チェックリスト生成
 CROSSMALL -> 受注チェックリスト生成 : CSVファイル
 
 CROSSMALL -> ピッキングシート生成 : CSVファイル
@@ -59,8 +60,6 @@ deactivate ピッキングシート生成
 
 電算室 -> SLIMS : DB投入
     
-Boundary 受注チェックリスト生成
-
 activate 受注チェックリスト生成
     
     database 出荷チェック用DB
