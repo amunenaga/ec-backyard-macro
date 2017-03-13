@@ -233,7 +233,7 @@ ActiveSheet.Name = BookName
         If Dir(PICKING_FOLDER & BookName & ".xlsx") = "" Then
             SavePath = PICKING_FOLDER & BookName
         Else
-            SavePath = PICKING_FOLDER & Format(Time, "hh:mm") & BookName
+            SavePath = PICKING_FOLDER & Format(Time, "hhmm") & BookName
         End If
         
             ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
@@ -244,7 +244,7 @@ ActiveSheet.Name = BookName
         If Dir(DeskTopPath & BookName & ".xlsx") = "" Then
             DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & BookName
         Else
-            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hh:mm") & BookName
+            DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & BookName
         End If
         
         MsgBox "ネット販売関連に繋がらないため、" & BookName & "をデスクトップに保存します。"

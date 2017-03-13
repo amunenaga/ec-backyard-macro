@@ -12,7 +12,7 @@ End If
 'プログレスバーの準備
 With ShowProgress
     .ProgressBar.Min = 1
-    .ProgressBar.Max = 9
+    .ProgressBar.Max = 8
 
     .Show vbModeless
 End With
@@ -43,6 +43,9 @@ ProgressStep = 3
 
 For Each Mall In Malls
     
+    'モール毎の受注件数がゼロ件なら生成しない。
+    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), CStr(Mall) & "*") = 0 Then GoTo Continue
+    
     ProgressStep = ProgressStep + 1
     ShowProgress.ProgressBar.Value = ProgressStep
     ShowProgress.StepMessageLabel = Mall & "データ処理中"
@@ -52,6 +55,8 @@ For Each Mall In Malls
     
     '振分け用シート作成
     Call BuildSheets.CreateSorterSheet(CStr(Mall))
+
+Continue:
 
 Next
 
@@ -68,36 +73,36 @@ Application.DisplayAlerts = False
 ShowProgress.ProgressBar.Value = 7
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
 
-Dim DeskTop As String, PutFileName As String, SavePath As String
-Const SAVE_PATH = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ"
+Dim DeskTop As String, SaveFileName As String, SavePath As String
+Const SAVE_FOLDER = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ\"
 
-PutFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
+SaveFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
 
-'当日8時取込分のタイムスタンプ無しファイルがないか確認
-If Dir(SAVE_PATH & PutFileName) <> "" Then
-    PutFileName = Format(Time, "hh:mm") & PutFileName
-End If
-    
-'擬似的なTry-Catchで保存
-On Error Resume Next
-    
-    ThisWorkbook.SaveAs Filename:="\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ", FileFormat:=xlWorkbookDefault
-    
-    'catch
-    If Err Then
-        Err.Clear
-        MsgBox "ネット販売関連に繋がりませんでした、デスクトップへ保存します。"
-        Dim DeskTop As String, SavePath As String
-        DeskTop = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop")
-    
-        If Dir(DeskTop & "\" & PutFileName) <> "" Then
-            PutFileName = Replace(PutFileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "AM/PMhhmm"))
-        End If
-    
+
+If Dir(SAVE_FOLDER, vbDirectory) <> "" Then
+    '既に本日ファイルがあれば、時刻付けて保存
+    If Dir(SAVE_FOLDER & SaveFileName & ".xlsx") = "" Then
+        SavePath = SAVE_FOLDER & SaveFileName
+    Else
+        SavePath = SAVE_FOLDER & Format(Time, "hhmm") & SaveFileName
     End If
+    
+        ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
 
-'On Error Goto 0 宣言でErrは解除される
-On Error GoTo 0
+Else
+    
+    Dim DeskTopPath As String
+    If Dir(DeskTopPath & SaveFileName & ".xlsx") = "" Then
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & SaveFileName
+    Else
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & SaveFileName
+    End If
+    
+    MsgBox "ネット販売関連に繋がらないため、" & SaveFileName & "をデスクトップに保存します。"
+        
+    ActiveWorkbook.SaveAs Filename:=DeskTopPath, FileFormat:=xlWorkbookDefault
+
+End If
 
 ShowProgress.ProgressBar.Value = 8
 ShowProgress.StepMessageLabel = Mall & "振分シート プリント"
@@ -110,8 +115,6 @@ For i = 2 To Worksheets.Count
     'Worksheets(i).PrintOut
 
 Next
-
-ShowProgress.ProgressBar.Value = 9
 
 OrderSheet.Activate
 

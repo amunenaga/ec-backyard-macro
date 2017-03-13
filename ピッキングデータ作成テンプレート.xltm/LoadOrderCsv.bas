@@ -20,6 +20,16 @@ If FilePath = "False" Then
     End
 End If
 
+If DateDiff("D", FileDateTime(FilePath), Date) <> 0 Then
+    Dim IsContinue As Integer
+    IsContinue = MsgBox(Prompt:="本日のダウンロードファイルではありません。" & vbLf & "提出用ピッキングシートを生成しますか？", Buttons:=vbYesNo + vbQuestion)
+
+    If IsContinue = vbNo Then
+        MsgBox "処理を終了します。"
+        End
+    End If
+
+End If
 'データ接続を利用してCSVデータを読み込み
 With ActiveSheet.QueryTables.Add(Connection:= _
     "TEXT;" & FilePath, Destination:=Range("$A$2"))
@@ -57,7 +67,7 @@ Call SetParse
 
 ActiveWorkbook.Connections(1).Delete
 
-End Function
+End Sub
 
 Private Sub FixForAddin()
 Dim CodeRange As Range, c As Range
