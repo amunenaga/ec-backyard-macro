@@ -226,7 +226,7 @@ ActiveSheet.Name = BookName
 '一旦新規作成ブックを保存することでブック名を変更する
 '新規作成ファイルの保存時はファイルフォーマットを明示する必要な模様
     Dim SavePath As String
-    Const PICKING_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\クロスモールテスト\"
+    Const PICKING_FOLDER As String = "\\Server02\商品部\ネット販売関連\ピッキング\"
     
     If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
         '既に本日ファイルがあれば、時刻付けて保存

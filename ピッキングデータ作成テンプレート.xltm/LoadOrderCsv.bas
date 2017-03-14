@@ -5,7 +5,7 @@ Sub LoadCsv(Optional ByVal bool As Boolean)
 'クロスモールからダウンロードしたCSV読込
 
 'フォルダを指定してファイル指定ダイアログからファイル指定
-Const CSV_DL_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\クロスモールテスト"
+Const CSV_DL_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール"
 
 Dim FilePath As String
 
@@ -28,8 +28,11 @@ If DateDiff("D", FileDateTime(FilePath), Date) <> 0 Then
         MsgBox "処理を終了します。"
         End
     End If
-
 End If
+
+'マクロ起動ボタン削除
+OrderSheet.Shapes(1).Delete
+
 'データ接続を利用してCSVデータを読み込み
 With ActiveSheet.QueryTables.Add(Connection:= _
     "TEXT;" & FilePath, Destination:=Range("$A$2"))
@@ -60,6 +63,12 @@ With ActiveSheet.QueryTables.Add(Connection:= _
     .TextFileTrailingMinusNumbers = True
     .Refresh BackgroundQuery:=True
 End With
+
+'クロスモールのCSVが読み込まれたかチェック クロスモール側で採番する連番は数字8ケタ
+If Not Range("A2").Value Like String(8, "#") Then
+    MsgBox Prompt:="読込んだファイルにクロスモールの連番がありません。" & vbLf & "処理を終了します。", Buttons:=vbCritical, Title:="正しくないファイル"
+    End
+End If
 
 'アドイン用のコード修正、セット分解
 Call FixForAddin

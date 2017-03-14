@@ -35,6 +35,9 @@ Call ConnectDB.Make_List
 '無効なロケーションをカット
 Call DataVaridate.ModifyOrderSheet
 
+'受注データシートでの処理終了、シート保護をかける
+OrderSheet.Protect
+
 'モール毎の電算室提出データ保存、振分けシート作成
 Dim Mall As Variant, Malls As Variant, ProgressStep As Long
 
@@ -43,7 +46,7 @@ ProgressStep = 3
 
 For Each Mall In Malls
     
-    'モール毎の受注件数がゼロ件なら生成しない。
+    'モール毎の受注件数がゼロ件ならファイル生成しない。
     If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), CStr(Mall) & "*") = 0 Then GoTo Continue
     
     ProgressStep = ProgressStep + 1
@@ -64,14 +67,12 @@ Next
 Application.DisplayAlerts = False
 
 'テンプレートシートを削除
-'Worksheets("ピッキングシート提出用テンプレート").Delete
-'Worksheets("振分用テンプレート").Delete
-
-'このファイルを保存
-
+Worksheets("ピッキングシート提出用テンプレート").Delete
+Worksheets("振分用テンプレート").Delete
 
 ShowProgress.ProgressBar.Value = 7
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
+'このファイルを保存
 
 Dim DeskTop As String, SaveFileName As String, SavePath As String
 Const SAVE_FOLDER = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ\"
@@ -112,7 +113,8 @@ ShowProgress.StepMessageLabel = Mall & "振分シート プリント"
 Dim i As Long
 For i = 2 To Worksheets.Count
 
-    'Worksheets(i).PrintOut
+    Worksheets(i).Protect
+    Worksheets(i).PrintOut
 
 Next
 
@@ -120,6 +122,6 @@ OrderSheet.Activate
 
 'プログレスバーを消して終了メッセージ
 ShowProgress.Hide
-MsgBox Prompt:="処理完了", Buttons:=vbInformation
+MsgBox Prompt:="処理完了", Buttons:=vbInformation, Title:="処理終了"
 
 End Sub
