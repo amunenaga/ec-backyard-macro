@@ -37,6 +37,9 @@ End With
 
 ActiveWorkbook.Connections(1).Delete
 
+'マクロ起動ボタン削除
+Worksheets("受注データ").Shapes(1).Delete
+
 End Sub
 Private Function GetOrderCheckListPath() As String
 'フォルダを指定してファイル指定ダイアログからファイル指定
