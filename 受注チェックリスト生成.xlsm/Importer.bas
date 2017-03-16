@@ -10,7 +10,7 @@ CsvPath = GetOrderCheckListPath()
 With ActiveSheet.QueryTables.Add(Connection:= _
     "TEXT;" & CsvPath, Destination:=Range("$A$2"))
     .Name = "受注チェックリスト詳細読込"
-    .FieldNames = True
+    .FieldNames = False
     .RowNumbers = False
     .FillAdjacentFormulas = False
     .PreserveFormatting = True
@@ -44,7 +44,7 @@ End Sub
 Private Function GetOrderCheckListPath() As String
 'フォルダを指定してファイル指定ダイアログからファイル指定
 
-Const CSV_DL_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\クロスモールテスト" '末尾\マーク必須
+Const CSV_DL_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール" '末尾\マーク必須
 
 Dim FilePath As String
 

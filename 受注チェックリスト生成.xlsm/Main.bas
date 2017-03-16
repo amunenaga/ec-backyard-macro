@@ -10,6 +10,12 @@ Transfer.作業シートへデータ抽出
 '作業シートでのデータ修正処理
 Worksheets("作業シート").Activate
 
+'作業シートデータ有無チェック
+If Worksheets("作業シート").Range("A2").Value = "" Then
+    MsgBox Prompt:="楽天注文が含まれないCSVデータです、処理を終了します。"
+    ThisWorkbook.Close SaveChanges:=False
+End If
+
 SetParser.セット分解
 Transfer.店舗識別番号振替
 Transfer.住所結合
