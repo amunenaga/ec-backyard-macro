@@ -17,9 +17,6 @@ With ShowProgress
     .Show vbModeless
 End With
 
-'マクロ起動ボタンを消去
-'OrderSheet.Shapes(1).Delete
-
 ShowProgress.ProgressBar.Value = 2
 ShowProgress.StepMessageLabel = "CSV読込中"
 
@@ -41,14 +38,11 @@ OrderSheet.Protect
 'モール毎の電算室提出データ保存、振分けシート作成
 Dim Mall As Variant, Malls As Variant, ProgressStep As Long
 
-Malls = Array("Amazon", "楽天", "Yahoo")
+Malls = Array("アマゾン", "楽天", "Yahoo")
 ProgressStep = 3
 
 For Each Mall In Malls
-    
-    'モール毎の受注件数がゼロ件ならファイル生成しない。
-    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), CStr(Mall) & "*") = 0 Then GoTo Continue
-    
+        
     ProgressStep = ProgressStep + 1
     ShowProgress.ProgressBar.Value = ProgressStep
     ShowProgress.StepMessageLabel = Mall & "データ処理中"

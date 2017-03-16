@@ -31,7 +31,7 @@ If DateDiff("D", FileDateTime(FilePath), Date) <> 0 Then
 End If
 
 'マクロ起動ボタン削除
-OrderSheet.Shapes(1).Delete
+'OrderSheet.Shapes(1).Delete
 
 'データ接続を利用してCSVデータを読み込み
 With ActiveSheet.QueryTables.Add(Connection:= _
@@ -78,7 +78,7 @@ ActiveWorkbook.Connections(1).Delete
 
 End Sub
 
-Private Sub FixForAddin()
+Sub FixForAddin()
 Dim CodeRange As Range, c As Range
 Set CodeRange = Range(Cells(2, 2), Cells(Range("B1").SpecialCells(xlCellTypeLastCell).Row, 2))
 

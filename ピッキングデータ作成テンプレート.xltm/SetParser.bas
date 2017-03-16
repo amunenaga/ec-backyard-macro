@@ -214,6 +214,4 @@ End If
 'セットなら、必要数量はセット数量×受注数量に書き換え
 Range("J" & r.Row).Value = Range("J" & r.Row).Value * CLng(Val(SeparatedCode(1)))
 
-
 End Sub
-

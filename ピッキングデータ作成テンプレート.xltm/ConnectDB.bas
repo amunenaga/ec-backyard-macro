@@ -91,7 +91,7 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         Cells(Loop_Count, OutPut_ColBase + 2).Value = DB_Rs("現在庫数計")
         
         'ロケーション情報の取得
-        SQL_W1 = "SELECT 在庫マスタ.商品コード, 在庫マスタ.倉庫コード,"
+        SQL_W1 = "SELECT 在庫マスタ.商品コード,"
         SQL_W1 = SQL_W1 & "[在庫マスタ].[階]+'-'+[在庫マスタ].[通路]+'-'+[在庫マスタ].[棚番]+'-'+[在庫マスタ].[段]+'-'+[在庫マスタ].[順] AS ロケーション "
         SQL_W1 = SQL_W1 & "FROM 在庫マスタ WHERE (在庫マスタ.商品コード=" & DB_Rs("商品コード") & ");"
         
@@ -99,7 +99,7 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         
         Loc_Text = ""
         Do While Not DB_Rs.EOF
-            Loc_Text = Loc_Text & "[" & DB_Rs("倉庫コード") & ":" & DB_Rs("ロケーション") & "]"
+            Loc_Text = Loc_Text & "[" & DB_Rs("ロケーション") & "]"
             DB_Rs.MoveNext
         Loop
         

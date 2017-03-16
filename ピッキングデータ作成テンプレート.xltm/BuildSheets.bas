@@ -126,6 +126,18 @@ End Sub
 
 Sub OutputPickingData(MallName As String)
 
+'モール名、クロスモール内では「アマゾン」でなく「Amazon」
+Dim MallIdentify As String
+If MallName = "アマゾン" Then
+    MallIdentify = "Amazon"
+Else
+    MallIdentify = MallName
+End If
+
+'モール毎の受注件数がゼロ件ならファイル生成しない。
+If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), CStr(MallIdentify) & "*") = 0 Then GoTo Continue
+
+
 '提出用ファイルを用意
 '100番/200番棚有り -2-3、電算室提出
 Dim ForSlimsBook As Workbook, ForSlimsSheet As Worksheet
@@ -153,7 +165,7 @@ k = 2
 Do
 
     '引数で渡されたモール以外は飛ばす
-    If Not Range("G" & i).Value Like (MallName & "*") Then GoTo Continue
+    If Not Range("F" & i).Value Like (MallIdentify & "*") Then GoTo Continue
     
     '受注時コードの7777は電算提出データに含めない。
     If Range("I" & i).Value Like "7777*" Then GoTo Continue
@@ -172,12 +184,17 @@ Do
     End If
     
     '配列に提出ファイル1行分のデータを格納
+    'アマゾンのみ、電算室処理でアマゾン注文番号を判定している、連番不可
+    If MallIdentify = "Amazon" Then
+        Order(0) = CStr(Range("H" & i).Value) 'モール側採番の注文番号
+    Else
+        Order(0) = CStr(Range("A" & i).Value) 'クロスモール採番の連番
+    End If
     
-    Order(0) = CStr(Range("A" & i).Value) '注文番号
     Order(1) = CStr(Code) '商品コード
     Order(2) = Range("C" & i).Value '商品名
-    Order(3) = Range("E" & i).Value '数量
-    Order(4) = Range("D" & i).Value '販売価格
+    Order(3) = Range("J" & i).Value '数量
+    Order(4) = Range("E" & i).Value '販売価格
     Order(5) = Range("N" & i).Value '現在庫
     Order(6) = Range("K" & i).Value '有効ロケーション
     
@@ -206,12 +223,36 @@ Continue:
 
 Loop Until IsEmpty(Range("A" & i))
 
-'罫線を引く
-ForSlimsSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
-NoEntryItemSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+'Pシートのブック保存処理
+'Amazonのみ送料列が必要、送料列 0円 で埋める
+With ForSlimsSheet
+    .Activate
 
-'ブックを保存
+    If MallName = "アマゾン" Then
+        .Columns("G").Insert
+        .Range("G1").Value = "送料"
+        .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
+    End If
+
+    '罫線引いて保存
+    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    
+End With
 ForSlimsBook.Close SaveChanges:=True
+    
+With NoEntryItemSheet
+    .Activate
+    
+    If MallName = "アマゾン" Then
+        .Columns("G").Insert
+        .Range("G1").Value = "送料"
+        .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
+    End If
+    
+    '罫線引いて保存
+    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    
+End With
 NoEntryItemBook.Close SaveChanges:=True
 
 End Sub
@@ -276,3 +317,8 @@ Next
 Application.DisplayAlerts = True
 
 End Sub
+
+Sub Test_buildsheet()
+    Call BuildSheets.OutputPickingData("アマゾン")
+End Sub
+
