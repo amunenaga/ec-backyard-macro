@@ -41,7 +41,7 @@ Do
 
     '配列に行を格納
     Order(0) = CStr(Range("B" & i).Value) '受注時コード
-    Order(1) = Range("C" & i).Value '商品名
+    Order(1) = ValidateName(Range("C" & i).Value) '商品名、≪≫など削除した上で転記
     Order(2) = Range("D" & i).Value '受注数量
     Order(3) = CStr(Range("L" & i).Value) 'JAN
     Order(4) = Range("K" & i).Value '有効ロケーション
@@ -108,7 +108,7 @@ Continue:
 Loop Until IsEmpty(Range("A" & i))
 
 
-Call Sort.振分用シート_ソート(ForSorterSheet)
+Call SortHasLocation(ForSorterSheet)
 
 ForSorterSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
 ForSorterSetItemSheet.Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
@@ -128,19 +128,25 @@ End Sub
 Sub OutputPickingData(ByVal MallName As String)
 
 '引数の名前で新規ブックを作成する
-'ファイル名はAmazon時のみカタカナのアマゾン、電算室側の処理の関係で固定
+'ファイル名はAmazon-ピッキングシート、Yahoo=ヤフーPシート、電算室側の処理の関係で固定
 Dim BookName As String
-BookName = IIf(MallName = "Amazon", "アマゾン", BookName)
+If MallName = "Amazon" Then
+    BookName = "ピッキングシート"
+ElseIf MallName = "Yahoo" Then
+    BookName = "ヤフーPシート"
+Else
+    BookName = MallName & "Pシート"
+End If
 
 '提出用ファイルを用意
 '100番/200番棚有り -2-3、電算室提出
 Dim ForSlimsBook As Workbook, ForSlimsSheet As Worksheet
-Set ForSlimsBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-2-3")
+Set ForSlimsBook = PreparePickingBook(BookName & Format(Date, "MMdd") & "-2-3")
 Set ForSlimsSheet = ForSlimsBook.Worksheets(1)
 
 '登録無し、棚無し -a
 Dim NoEntryItemBook As Workbook, NoEntryItemSheet As Worksheet
-Set NoEntryItemBook = PreparePickingBook(BookName & "Pシート" & Format(Date, "MMdd") & "-a")
+Set NoEntryItemBook = PreparePickingBook(BookName & Format(Date, "MMdd") & "-a")
 Set NoEntryItemSheet = NoEntryItemBook.Worksheets(1)
 
 OrderSheet.Activate
@@ -186,7 +192,7 @@ Do
     End If
     
     Order(1) = CStr(Code) '商品コード
-    Order(2) = Range("C" & i).Value '商品名
+    Order(2) = ValidateName(Range("C" & i).Value)  '商品名≪≫など削除して転記
     Order(3) = Range("J" & i).Value '数量
     Order(4) = Range("E" & i).Value '販売価格
     Order(5) = Range("N" & i).Value '現在庫
@@ -310,5 +316,41 @@ For k = 0 To 5
 Next
 
 Application.DisplayAlerts = True
+
+End Sub
+
+Private Sub SortHasLocation(Sheet As Worksheet)
+
+Dim SortRange As Range
+Set SortRange = Sheet.Range("A1").CurrentRegion
+
+Dim CodeRange As Range
+Set CodeRange = Sheet.Range("A2:A" & SortRange.Rows.Count)
+
+'ソート条件をセット
+With Sheet.Sort
+    
+    '一旦ソートをクリア
+    .SortFields.Clear
+    
+    'ソートキーをセット 第一キー 商品コード：色、第二キー 商品コード：昇順
+    .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnCellColor, Order:=xlAscending, DataOption:=xlSortNormal
+    .SortFields.Add Key:=CodeRange, SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:=xlSortNormal
+
+    'ソート対象のデータが入ってる範囲を指定して
+    .SetRange SortRange
+    .Header = xlYes
+    .MatchCase = False
+    .Orientation = xlTopToBottom
+    .SortMethod = xlPinYin
+    
+    'セットした条件を適用
+    .Apply
+
+End With
+
+'カレントリージョンがセレクトされているので、選択セルをセルA1にセットし直す
+Sheet.Activate
+Range("A1").Select
 
 End Sub

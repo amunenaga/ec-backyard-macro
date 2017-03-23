@@ -30,7 +30,7 @@ Application.Wait Now + TimeValue("00:00:01")
 
 'DB接続、ロケーション取得、受注データの修正
 Call ConnectDB.Make_List
-Call DataVaridate.ModifyOrderSheet
+Call DataValidate.FilterLocation
 
 '受注データシートでの処理終了、シート保護をかける
 OrderSheet.Protect
@@ -89,7 +89,7 @@ If Dir(SAVE_FOLDER, vbDirectory) <> "" Then
 Else
     
     Dim DeskTopPath As String
-    If Dir(DeskTopPath & SaveFileName) = "" Then
+    If Dir(DeskTopPath & SaveFileName & ".xlsx") = "" Then
         DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & SaveFileName
     Else
         DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & SaveFileName

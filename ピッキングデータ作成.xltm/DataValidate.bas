@@ -1,7 +1,7 @@
-Attribute VB_Name = "DataVaridate"
+Attribute VB_Name = "DataValidate"
 Option Explicit
 
-Sub ModifyOrderSheet(Optional ByVal arg As Boolean)
+Sub FilterLocation(Optional ByVal arg As Boolean)
 'アドインで取得したデータを修正する
 'エクセルのマクロ一覧に出さないようにするため引数付きとしている。
 
@@ -14,13 +14,12 @@ For i = 2 To LastRow
     
     'ロケーション修正、商品名バリデーション
     Cells(i, 11).Value = CutOffUnlocation(Cells(i, 15).Value)
-    Cells(i, 3).Value = ValidateName(Cells(i, 3).Value)
     
 Next
 
 End Sub
 
-Private Function CutOffUnlocation(Location As String) As String
+Function CutOffUnlocation(Location As String) As String
 ' 正規表現でロケーション[0-0-0-0][0- -0- - ][1-0-0-0-0]などを削除して返します。
 
 Dim Reg As New RegExp
@@ -32,13 +31,19 @@ CutOffUnlocation = Reg.Replace(Location, "")
 
 End Function
 
-Private Function ValidateName(Name As String) As String
+Function ValidateName(Name As String) As String
 
 Dim Reg As New RegExp
 
 Reg.Global = True
 Reg.Pattern = ",|\!|\.|&"
 
-ValidateName = Reg.Replace(Name, "")
+Name = Reg.Replace(Name, "")
+
+
+Reg.Pattern = "^((≪|【).*?(】|≫))*"
+Name = Reg.Replace(Name, "")
+
+ValidateName = Name
 
 End Function
