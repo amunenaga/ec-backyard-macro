@@ -4,29 +4,23 @@ Sub 佐川ヤマト_シート作成()
 
 'ファイル保存
 Application.DisplayAlerts = False
-    ThisWorkbook.SaveAs Filename:=ThisWorkbook.Path & "\出荷確認_" & Format(Date, "yyyyMMdd") & ".xlsx", FileFormat:=xlWorkbookDefault
+    ThisWorkbook.SaveAs Filename:=ThisWorkbook.path & "\出荷確認_" & Format(Date, "yyyyMMdd") & ".xlsx", FileFormat:=xlWorkbookDefault
 Application.DisplayAlerts = True
 
 
 'TSV/CSVファイルパス指定
-Dim Path As Collection
-Set Path = GetCsvPath()
-
-'Amazon、楽天、YahooのCSVパスがあるか確認
-If Path.Count = 0 Then
-    MsgBox Prompt:="CSVファイルが指定されていません、処理を終了します。", Buttons:=vbCritical
-    Exit Sub
-End If
+Dim Paths As Variant
+Paths = GetCsvPath()
 
 'ボタン削除
-'Worksheets("トップ").Shapes(1).Delete
+Worksheets("トップ").Shapes(1).Delete
 
 On Error Resume Next
 
     Dim ErrorMall As String 'シートへ読み込めなかったモールを追記する
     
     'Try
-    Call LoadAmazon(Path.Item("Amazon"))
+    Call LoadAmazon(Paths(0))
     'catch
     If Err Then
         Err.Clear '明示的にクリアーしていないと、次のIf Err構文でTrueとなる
@@ -34,7 +28,7 @@ On Error Resume Next
     End If
     
     'Try
-    Call LoadRakuten(Path.Item("Rakuten"))
+    Call LoadRakuten(Paths(1))
     'catch
     If Err Then
         Err.Clear
@@ -42,7 +36,7 @@ On Error Resume Next
     End If
 
     'Try
-    Call LoadYahoo(Path.Item("Yahoo"))
+    Call LoadYahoo(Paths(2))
     'catch
     If Err Then
         Err.Clear
@@ -50,6 +44,17 @@ On Error Resume Next
     End If
     
 On Error GoTo 0
+
+'データ取得後処理  データリンク削除＆セルの「名前」削除
+Dim qt As QueryTable
+For Each qt In Worksheets("トップ").QueryTables
+    qt.Delete
+Next qt
+
+Dim nm As Name
+For Each nm In ActiveWorkbook.Names
+    nm.Delete
+Next nm
 
 '運送会社別にシートへコピー
 '運送会社毎の送り状番号冒頭5ケタは、SortByCarrierプロシージャにてハードコーディング
@@ -62,17 +67,6 @@ For i = 1 To Worksheets.Count
     Worksheets(i).Range("A1").CurrentRegion.Columns.AutoFit
 Next i
 
-'後処理  データリンク削除＆セルの「名前」削除
-Dim qt As QueryTable
-For Each qt In Worksheets("トップ").QueryTables
-    qt.Delete
-Next qt
-
-Dim nm As Name
-For Each nm In ActiveWorkbook.Names
-    nm.Delete
-Next nm
-
 '振分後の保存と完了メッセージ
 ThisWorkbook.Save
 
@@ -84,10 +78,10 @@ End If
 
 End Sub
 
-Sub LoadAmazon(ByVal Path As String)
+Sub LoadAmazon(ByVal path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & Path, Destination:=GetDestRange())
+    "TEXT;" & path, Destination:=GetDestRange())
     .Name = "Amazon"
     .FieldNames = True
     .RowNumbers = False
@@ -118,10 +112,10 @@ Call FillMallName("Amazon")
 
 End Sub
 
-Sub LoadRakuten(ByVal Path As String)
+Sub LoadRakuten(ByVal path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & Path, Destination:=GetDestRange())
+    "TEXT;" & path, Destination:=GetDestRange())
     .Name = "楽天"
     .FieldNames = True
     .RowNumbers = False
@@ -152,10 +146,10 @@ Call FillMallName("楽天")
 
 End Sub
 
-Sub LoadYahoo(ByVal Path As String)
+Sub LoadYahoo(ByVal path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & Path, Destination:=GetDestRange()) 'パスと書き出し先は動的に決める
+    "TEXT;" & path, Destination:=GetDestRange()) 'パスと書き出し先は動的に決める
     .Name = "yahoo"
     .FieldNames = True
     .RowNumbers = False
@@ -208,13 +202,15 @@ Sub SortByCarrier(ByVal CarrierName As String)
 '運送会社とフィルター条件のマッピング
 Dim Criteria As Variant
 
+Worksheets("トップ").Activate
+
 Select Case CarrierName
     
     Case "佐川急便"
         Criteria = "4031*"
     
     Case "ヤマト運輸"
-        Criteria = Array("7645*", "3046*")
+        Criteria = Array("7645*", "3011*")
 
 End Select
 
@@ -227,7 +223,7 @@ End With
 
 End Sub
 
-Function GetCsvPath() As Collection
+Function GetCsvPath() As Variant
 '送り状番号CSVパスを取得、3ファイルまで同時指定可能
 
 'ファイルダイアログにてAmazon・楽天・ヤフーのTSV/CSVファイルを複数同時指定してもらう
@@ -239,7 +235,7 @@ With fd
     .Filters.Clear
     .Filters.Add "Amazon,楽天,Yahoo!", "*.tsv; *.csv"
     .InitialFileName = "\\Server02\商品部\ネット販売関連\出荷通知"
-
+    
     'ダイアログ表示
     .Show
     
@@ -255,29 +251,27 @@ With fd
     
     End If
     
-    Dim Paths As Collection, CurrentPath As String, i As Long
-    Set Paths = New Collection
+    Dim Paths(2) As String, CurrentPath As String, i As Long
     
     '選択されたファイルパスを、Amazon・楽天・ヤフーをキーとしたコレクションに入れ直す
     For i = 1 To .SelectedItems.Count
         CurrentPath = .SelectedItems.Item(i)
         
         Select Case True
-            Case CurrentPath Like "*amazon*"
-                Paths.Add Item:=CurrentPath, Key:="Amazon"
+            Case CurrentPath Like "*A*"
+                Paths(0) = CurrentPath
             
-            Case CurrentPath Like "*楽天*"
-                Paths.Add Item:=CurrentPath, Key:="Rakuten"
+            Case CurrentPath Like "*R*"
+                Paths(1) = CurrentPath
                 
-            Case CurrentPath Like "*yahoo*"
-                Paths.Add Item:=CurrentPath, Key:="Yahoo"
+            Case CurrentPath Like "*Y*"
+                Paths(2) = CurrentPath
             
         End Select
     Next
-
 End With
 
-Set GetCsvPath = Paths
+GetCsvPath = Paths
 
 End Function
 
