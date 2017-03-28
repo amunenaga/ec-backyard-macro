@@ -51,6 +51,16 @@ Do
     '現在庫が取得できてないときは、印刷レイアウトの関係のため空白1文字入れておく
     If Order(5) = "" Then Order(5) = " "
     
+    '商魂JANが空欄かつ、受注時コードがJANならJAN項目に入れる
+    If Order(3) = "" Then
+        Dim RawCode As String
+        RawCode = Range("B" & i).Value
+        If RawCode Like String(13, "#") _
+            And Not RawCode Like "77777*" Then
+                Order(3) = RawCode
+        End If
+    End If
+    
     '転記先判定
     '7777始まりセットとセット構成商品、受注時コード7777***
     If Range("B" & i) Like "7777*" Then
