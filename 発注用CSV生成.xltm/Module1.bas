@@ -206,7 +206,7 @@ ProductListRange.AutoFilter Field:=col, Criteria1:=RGB(255, 255, 0), Operator:=x
 
 'フィルターした後の行数をカウント＝依頼商品数
 Dim CountItem As Long
-CountItem = WorksheetFunction.Subtotal(2, Cells(3, col).Resize(Cells(2, col).SpecialCells(xlCellTypeLastCell).Row, 1))
+CountItem = WorksheetFunction.Subtotal(3, Range("C:C")) - 1
 
 Call setItemCount(PickingSheetName, CountItem)
 
@@ -494,7 +494,7 @@ Select Case MallName
     Case "楽天"
         ItemCount(1) = Count
     
-    Case "ヤフー"
+    Case "Yahoo"
         ItemCount(2) = Count
     
     End Select
