@@ -43,7 +43,7 @@ End If
 
 'SQL Serverê⁄ë±
 DB_Cnn.ConnectionTimeout = 0
-DB_Cnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
+DB_Cnn.Open "PROVIDER=SQLOLEDB;Server=Database=;UID=;PWD=;"
 DB_Cmd.CommandTimeout = 180
 Set DB_Cmd.ActiveConnection = DB_Cnn
 
