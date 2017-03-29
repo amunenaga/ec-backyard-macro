@@ -1,109 +1,130 @@
 Attribute VB_Name = "ConnectDB"
 Sub Make_List(Optional ByVal arg As Boolean)
-'ì¬F¤•i•”
+'ï¿½ì¬ï¿½Fï¿½ï¿½ï¿½iï¿½ï¿½
 
-'SQLŒn•Ï”
+'SQLï¿½nï¿½Ïï¿½
 Dim DB_Cnn As New ADODB.Connection
 Dim DB_Cmd  As New ADODB.Command
 Dim DB_Rs As New ADODB.Recordset
 Dim SQL_W1 As String
 
-'ó‘ÔŠm”F•Ï”
+'ï¿½ï¿½ï¿½ÔŠmï¿½Fï¿½Ïï¿½
 Dim Target_RowEnd As Integer
 Dim Loop_Count As Integer
 Dim A As Integer
 Dim Target_Code As String
 Dim Loc_Text As String
 
-'’è”ƒZƒbƒg
+'ï¿½è”ï¿½Zï¿½bï¿½g
 Const Target_RowBase = 2
 Const Target_ColBase = 9
 Const Output_RowBase = 2
 Const OutPut_ColBase = 12
 
-'ƒV[ƒgƒ^ƒCƒgƒ‹—p•Ï”
+'ï¿½Vï¿½[ï¿½gï¿½^ï¿½Cï¿½gï¿½ï¿½ï¿½pï¿½Ïï¿½
 Dim S_HEAD(3)
 
-'ƒV[ƒgƒ^ƒCƒgƒ‹ƒZƒbƒg
-S_HEAD(0) = "JANƒR[ƒh"
-S_HEAD(1) = "¤•iƒR[ƒh"
-S_HEAD(2) = "Œ»İŒÉ”"
-S_HEAD(3) = "ƒƒP[ƒVƒ‡ƒ“"
+'ï¿½Vï¿½[ï¿½gï¿½^ï¿½Cï¿½gï¿½ï¿½ï¿½Zï¿½bï¿½g
+S_HEAD(0) = "JANï¿½Rï¿½[ï¿½h"
+S_HEAD(1) = "ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h"
+S_HEAD(2) = "ï¿½ï¿½ï¿½İŒÉï¿½"
+S_HEAD(3) = "ï¿½ï¿½ï¿½Pï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½"
 
 
-'Workbook‚ªŠJ‚¢‚Ä‚¢‚é‚©Šm”F
+'Workbookï¿½ï¿½ï¿½Jï¿½ï¿½ï¿½Ä‚ï¿½ï¿½é‚©ï¿½mï¿½F
 A = 0
 For Each wn In Workbooks
 A = A + 1
 Next
 If A = 0 Then
-MsgBox ("ƒV[ƒg‚ğŠJ‚¢‚Ä‚­‚¾‚³‚¢B")
+MsgBox ("ï¿½Vï¿½[ï¿½gï¿½ï¿½ï¿½Jï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½B")
 End
 End If
 
-'SQL ServerÚ‘±
+'SQL Serverï¿½Ú‘ï¿½
 DB_Cnn.ConnectionTimeout = 0
-DB_Cnn.Open "PROVIDER=SQLOLEDB;Server=Database=;UID=;PWD=;"
+DB_Cnn.Open "PROVIDER=SQLOLEDB;Server=;Database=;UID=;PWD=;"
 DB_Cmd.CommandTimeout = 180
 Set DB_Cmd.ActiveConnection = DB_Cnn
 
 
-'---ˆ—ŠJn---
-'ƒwƒbƒ_[ƒZƒbƒg
+'---ï¿½ï¿½ï¿½ï¿½ï¿½Jï¿½n---
+'ï¿½wï¿½bï¿½_ï¿½[ï¿½Zï¿½bï¿½g
 For Loop_Count = 0 To 3
     Cells(1, 12 + Loop_Count).Select
     Cells(1, 12 + Loop_Count).Value = S_HEAD(Loop_Count)
 Next Loop_Count
 
-'ÅIRowæ“¾
+'ï¿½ÅIRowï¿½æ“¾
 Cells(2, 1).Select
 Range(Selection, Selection.End(xlDown)).Select
 Target_RowEnd = ActiveSheet.Cells.SpecialCells(xlLastCell).Row
 
-'‰æ–ÊXVAÄŒvZ—}~
+'ï¿½ï¿½ï¿½ÊXï¿½Vï¿½Aï¿½ÄŒvï¿½Zï¿½}ï¿½~
 Application.ScreenUpdating = False
 Application.Calculation = xlCalculationManual
 
-'ƒƒCƒ“ƒ‹[ƒv
+'ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½v
 Cells(Target_RowBase, Target_ColBase).Select
 For Loop_Count = Target_RowBase To Target_RowEnd
     Target_Code = Cells(Loop_Count, Target_ColBase).Value
     
-    'ƒR[ƒh”»•ÊiƒCƒ“ƒXƒgƒAEJANj
+    'ï¿½Rï¿½[ï¿½hï¿½ï¿½ï¿½Êiï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½Aï¿½EJANï¿½j
     If Len(Target_Code) <= 6 Then
-        SQL_W1 = "SELECT ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh, ¤•iƒ}ƒXƒ^.JANƒR[ƒh, Sum(İŒÉƒ}ƒXƒ^.Œ»İŒÉ”) AS Œ»İŒÉ”Œv "
-        SQL_W1 = SQL_W1 & "FROM ¤•iƒ}ƒXƒ^ INNER JOIN İŒÉƒ}ƒXƒ^ ON ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh = İŒÉƒ}ƒXƒ^.¤•iƒR[ƒh "
-        SQL_W1 = SQL_W1 & "GROUP BY ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh, ¤•iƒ}ƒXƒ^.JANƒR[ƒh "
-        SQL_W1 = SQL_W1 & "HAVING (((¤•iƒ}ƒXƒ^.¤•iƒR[ƒh)=" & Target_Code & "));"
+        SQL_W1 = "SELECT ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h, Sum(ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½İŒÉï¿½) AS ï¿½ï¿½ï¿½İŒÉï¿½ï¿½v "
+        SQL_W1 = SQL_W1 & "FROM ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ INNER JOIN ï¿½İŒÉƒ}ï¿½Xï¿½^ ON ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h = ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h "
+        SQL_W1 = SQL_W1 & "GROUP BY ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h "
+        SQL_W1 = SQL_W1 & "HAVING (((ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h)=" & Target_Code & "));"
     Else
-        SQL_W1 = "SELECT ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh, ¤•iƒ}ƒXƒ^.JANƒR[ƒh, Sum(İŒÉƒ}ƒXƒ^.Œ»İŒÉ”) AS Œ»İŒÉ”Œv "
-        SQL_W1 = SQL_W1 & "FROM ¤•iƒ}ƒXƒ^ INNER JOIN İŒÉƒ}ƒXƒ^ ON ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh = İŒÉƒ}ƒXƒ^.¤•iƒR[ƒh "
-        SQL_W1 = SQL_W1 & "GROUP BY ¤•iƒ}ƒXƒ^.¤•iƒR[ƒh, ¤•iƒ}ƒXƒ^.JANƒR[ƒh "
-        SQL_W1 = SQL_W1 & "HAVING (((¤•iƒ}ƒXƒ^.JANƒR[ƒh)='" & Target_Code & "'));"
+        SQL_W1 = "SELECT ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h, Sum(ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½İŒÉï¿½) AS ï¿½ï¿½ï¿½İŒÉï¿½ï¿½v "
+        SQL_W1 = SQL_W1 & "FROM ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ INNER JOIN ï¿½İŒÉƒ}ï¿½Xï¿½^ ON ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h = ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h "
+        SQL_W1 = SQL_W1 & "GROUP BY ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h "
+        SQL_W1 = SQL_W1 & "HAVING (((ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h)='" & Target_Code & "'));"
     End If
     
     Set DB_Rs = DB_Cnn.Execute(SQL_W1)
 
     If Not DB_Rs.EOF Then
-        Cells(Loop_Count, OutPut_ColBase).Value = DB_Rs("JANƒR[ƒh")
+        Cells(Loop_Count, OutPut_ColBase).Value = DB_Rs("JANï¿½Rï¿½[ï¿½h")
         Cells(Loop_Count, OutPut_ColBase + 1).NumberFormatLocal = "@"
-        Cells(Loop_Count, OutPut_ColBase + 1).Value = Format(DB_Rs("¤•iƒR[ƒh"), "000000")
-        Cells(Loop_Count, OutPut_ColBase + 2).Value = DB_Rs("Œ»İŒÉ”Œv")
+        Cells(Loop_Count, OutPut_ColBase + 1).Value = Format(DB_Rs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h"), "000000")
+        Cells(Loop_Count, OutPut_ColBase + 2).Value = DB_Rs("ï¿½ï¿½ï¿½İŒÉï¿½ï¿½v")
         
-        'ƒƒP[ƒVƒ‡ƒ“î•ñ‚Ìæ“¾
-        SQL_W1 = "SELECT İŒÉƒ}ƒXƒ^.¤•iƒR[ƒh,"
-        SQL_W1 = SQL_W1 & "[İŒÉƒ}ƒXƒ^].[ŠK]+'-'+[İŒÉƒ}ƒXƒ^].[’Ê˜H]+'-'+[İŒÉƒ}ƒXƒ^].[’I”Ô]+'-'+[İŒÉƒ}ƒXƒ^].[’i]+'-'+[İŒÉƒ}ƒXƒ^].[‡] AS ƒƒP[ƒVƒ‡ƒ“ "
-        SQL_W1 = SQL_W1 & "FROM İŒÉƒ}ƒXƒ^ WHERE (İŒÉƒ}ƒXƒ^.¤•iƒR[ƒh=" & DB_Rs("¤•iƒR[ƒh") & ");"
+        'ï¿½ï¿½ï¿½Pï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ìæ“¾
+        SQL_W1 = "SELECT ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h,"
+        SQL_W1 = SQL_W1 & "[ï¿½İŒÉƒ}ï¿½Xï¿½^].[ï¿½K]+'-'+[ï¿½İŒÉƒ}ï¿½Xï¿½^].[ï¿½Ê˜H]+'-'+[ï¿½İŒÉƒ}ï¿½Xï¿½^].[ï¿½Iï¿½ï¿½]+'-'+[ï¿½İŒÉƒ}ï¿½Xï¿½^].[ï¿½i]+'-'+[ï¿½İŒÉƒ}ï¿½Xï¿½^].[ï¿½ï¿½] AS ï¿½ï¿½ï¿½Pï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ "
+        SQL_W1 = SQL_W1 & "FROM ï¿½İŒÉƒ}ï¿½Xï¿½^ WHERE (ï¿½İŒÉƒ}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h=" & DB_Rs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h") & ");"
         
         Set DB_Rs = DB_Cnn.Execute(SQL_W1)
         
         Loc_Text = ""
         Do While Not DB_Rs.EOF
-            Loc_Text = Loc_Text & "[" & DB_Rs("ƒƒP[ƒVƒ‡ƒ“") & "]"
+            Loc_Text = Loc_Text & "[" & DB_Rs("ï¿½ï¿½ï¿½Pï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½") & "]"
             DB_Rs.MoveNext
         Loop
         
         Cells(Loop_Count, OutPut_ColBase + 3).Value = Loc_Text
+        
+    Else
+        'ï¿½İŒÉƒ}ï¿½Xï¿½^ï¿½[ï¿½É“oï¿½^ï¿½ï¿½ï¿½È‚ï¿½ï¿½ê‡ï¿½Aï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ï¿½ï¿½ï¿½ç¤ï¿½iï¿½Rï¿½[ï¿½hï¿½ï¿½JANï¿½Ì‚İæ“¾ï¿½ï¿½ï¿½ï¿½
+        
+        'ï¿½Rï¿½[ï¿½hï¿½ï¿½ï¿½Êiï¿½Cï¿½ï¿½ï¿½Xï¿½gï¿½Aï¿½EJANï¿½j-> WHEREï¿½ï¿½ï¿½Zï¿½bï¿½g DBï¿½ÅƒRï¿½[ï¿½hï¿½Íï¿½ï¿½lï¿½^ï¿½AJANï¿½Íƒeï¿½Lï¿½Xï¿½gï¿½^
+        Dim Clause_WHERE As String
+        Clause_WHERE = IIf(Len(Target_Code) <= 6, "ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h = " & Target_Code, "ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h = '" & Target_Code & "'")
+    
+        SQL_W1 = "SELECT ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.JANï¿½Rï¿½[ï¿½h "
+        SQL_W1 = SQL_W1 & "FROM ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ "
+        SQL_W1 = SQL_W1 & "WHERE " & Clause_WHERE
+        
+        'SQLï¿½ï¿½ï¿½sï¿½ï¿½ï¿½Äoï¿½ï¿½
+        Set DB_Rs = DB_Cnn.Execute(SQL_W1)
+        
+        If Not DB_Rs.EOF Then
+            Cells(Loop_Count, OutPut_ColBase).Value = DB_Rs("JANï¿½Rï¿½[ï¿½h")
+            
+            Cells(Loop_Count, OutPut_ColBase + 1).NumberFormatLocal = "@"
+            Cells(Loop_Count, OutPut_ColBase + 1).Value = Format(DB_Rs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h"), "000000")
+        End If
         
     End If
 Next Loop_Count
