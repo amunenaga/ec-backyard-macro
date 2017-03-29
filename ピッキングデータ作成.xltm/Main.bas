@@ -1,6 +1,10 @@
 Attribute VB_Name = "Main"
 Option Explicit
 
+'あす楽・Amazonプライム分の作成かを記録するフラグ BuildSheets.PreparePickingBookで使用
+Public IsSecondPicking As Boolean
+Public IsTimeStampMode As Boolean
+
 Sub ピッキング_振分作成()
 
 OrderSheet.Activate
@@ -25,7 +29,7 @@ Call LoadCsv
 
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "ロケーションデータ取得中"
-Application.Wait Now + TimeValue("00:00:01")
+Application.Wait Now + TimeValue("00:00:02")
 '1秒待機してプログレスバーを更新
 
 'DB接続、ロケーション取得、受注データの修正
@@ -73,15 +77,15 @@ ShowProgress.StepMessageLabel = Mall & "保存処理中"
 Dim DeskTop As String, SaveFileName As String, SavePath As String
 Const SAVE_FOLDER = "\\server02\商品部\ネット販売関連\ピッキング\クロスモール\過去データ\"
 
-SaveFileName = "ピッキング・振分" & Format(Date, "MMdd") & ".xlsx"
+SaveFileName = "ピッキング・振分" & Format(Date, "MMdd")
 
-
+OrderSheet.Activate
 If Dir(SAVE_FOLDER, vbDirectory) <> "" Then
     '既に本日ファイルがあれば、時刻付けて保存
-    If Dir(SAVE_FOLDER & SaveFileName) = "" Then
+    If Dir(SAVE_FOLDER & SaveFileName & ".xlsx") = "" Then
         SavePath = SAVE_FOLDER & SaveFileName
     Else
-        SavePath = SAVE_FOLDER & Format(Time, "hhmm") & SaveFileName
+        SavePath = SAVE_FOLDER & SaveFileName & "-" & Format(Time, "hhmm")
     End If
     
         ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
@@ -92,7 +96,7 @@ Else
     If Dir(DeskTopPath & SaveFileName & ".xlsx") = "" Then
         DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & SaveFileName
     Else
-        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & Format(Time, "hhmm") & SaveFileName
+        DeskTopPath = CreateObject("WScript.Shell").SpecialFolders.Item("Desktop") & "\" & SaveFileName & "-" & Format(Time, "hhmm")
     End If
     
     MsgBox "ネット販売関連に繋がらないため、" & SaveFileName & "をデスクトップに保存します。"
@@ -114,10 +118,8 @@ For i = 2 To Worksheets.Count
 
 Next
 
-OrderSheet.Activate
-
 'プログレスバーを消して終了メッセージ
 ShowProgress.Hide
-MsgBox Prompt:="処理完了", Buttons:=vbInformation, Title:="処理終了"
+MsgBox prompt:="処理完了", Buttons:=vbInformation, Title:="処理終了"
 
 End Sub
