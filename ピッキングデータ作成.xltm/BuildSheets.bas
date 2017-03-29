@@ -293,30 +293,36 @@ End If
 'あす楽・プライム分のピッキングか？
 If Main.IsSecondPicking = True Then
     
-    BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd")) & "AR"
+    BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
 
     If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
         'ARファイルが既にある場合は時刻を付ける
-        BookName = BookName & Format(Time, "hhmm")
+        BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
         
     End If
 
 End If
 
 '時刻保存のフラグがあるか
-If Main.IsTimstampMode = True Then
+If Main.IsTimeStampMode = True Then
     BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
 If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" And Main.IsSecondPicking = False Then
     'ファイルがあって､あす楽プライム分のピッキングでない時のみ､選択ダイアログを表示
-    Dim IsAR As MsgBox
+    Dim IsAR As Integer
     IsAR = MsgBox(prompt:="本日分のファイルが既に存在します。" & vbLf & "あす楽・プライム分として保存しますか？", _
-            Buttons:=vbExclamation)
+            Buttons:=vbExclamation + vbYesNo)
     
     If IsAR = vbYes Then
-        BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd")) & "AR"
+        BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
         Main.IsSecondPicking = True
+        
+        If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
+            'ARファイルが既にある場合は時刻を付ける
+            BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
+        End If
+        
     Else
         
         'あす楽プライム分でないとき、時刻を含めたファイル名モードとする
