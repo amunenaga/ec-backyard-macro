@@ -166,10 +166,10 @@ Dim i As Long, k As Long, j As Long, Order(6) As Variant
 i = 2
 
 '棚無しシート行カウンタ
-j = 2
+j = 3
 
 '100番シート行カウンタ
-k = 2
+k = 3
 
 '用意したブックへ1行ずつコピー
 Do

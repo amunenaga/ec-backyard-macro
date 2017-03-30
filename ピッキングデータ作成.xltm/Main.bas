@@ -30,7 +30,7 @@ Call LoadCsv
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "ロケーションデータ取得中"
 Application.Wait Now + TimeValue("00:00:02")
-'1秒待機してプログレスバーを更新
+'2秒待機してプログレスバーを表示更新を待つ。梱包室で行うとプログレスバーが更新されない対策 効果未検証
 
 'DB接続、ロケーション取得、受注データの修正
 Call ConnectDB.Make_List
@@ -40,8 +40,12 @@ Call DataValidate.FilterLocation
 OrderSheet.Protect
 
 'モール毎の電算室提出データ保存、振分けシート作成
-Dim Mall As Variant, Malls As Variant, ProgressStep As Long
 
+'テンプレートの1行目に本日日付を入れる
+Worksheets("ピッキングシート提出用テンプレート").Range("C1").Value = Format(Date, "M月dd日")
+
+'クロスモール側で使用しているモール名の配列を作成し、イテレートする。
+Dim Mall As Variant, Malls As Variant, ProgressStep As Long
 Malls = Array("Amazon", "楽天", "Yahoo")
 ProgressStep = 3
 
