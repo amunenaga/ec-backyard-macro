@@ -4,7 +4,7 @@ Sub 佐川ヤマト_シート作成()
 
 'ファイル保存
 Application.DisplayAlerts = False
-    ThisWorkbook.SaveAs Filename:=ThisWorkbook.path & "\出荷確認_" & Format(Date, "yyyyMMdd") & ".xlsx", FileFormat:=xlWorkbookDefault
+    ThisWorkbook.SaveAs Filename:=ThisWorkbook.Path & "\出荷確認_" & Format(Date, "yyyyMMdd") & ".xlsx", FileFormat:=xlWorkbookDefault
 Application.DisplayAlerts = True
 
 
@@ -78,10 +78,10 @@ End If
 
 End Sub
 
-Sub LoadAmazon(ByVal path As String)
+Sub LoadAmazon(ByVal Path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & path, Destination:=GetDestRange())
+    "TEXT;" & Path, Destination:=GetDestRange())
     .Name = "Amazon"
     .FieldNames = True
     .RowNumbers = False
@@ -112,10 +112,10 @@ Call FillMallName("Amazon")
 
 End Sub
 
-Sub LoadRakuten(ByVal path As String)
+Sub LoadRakuten(ByVal Path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & path, Destination:=GetDestRange())
+    "TEXT;" & Path, Destination:=GetDestRange())
     .Name = "楽天"
     .FieldNames = True
     .RowNumbers = False
@@ -146,10 +146,10 @@ Call FillMallName("楽天")
 
 End Sub
 
-Sub LoadYahoo(ByVal path As String)
+Sub LoadYahoo(ByVal Path As String)
 
 With ActiveSheet.QueryTables.Add(Connection:= _
-    "TEXT;" & path, Destination:=GetDestRange()) 'パスと書き出し先は動的に決める
+    "TEXT;" & Path, Destination:=GetDestRange()) 'パスと書き出し先は動的に決める
     .Name = "yahoo"
     .FieldNames = True
     .RowNumbers = False
@@ -234,7 +234,7 @@ With fd
     'ファイル選択ダイアログの設定
     .Filters.Clear
     .Filters.Add "Amazon,楽天,Yahoo!", "*.tsv; *.csv"
-    .InitialFileName = "\\Server02\商品部\ネット販売関連\出荷通知"
+    .InitialFileName = "\\Server02\商品部\ネット販売関連\梱包室データ\出荷通知"
     
     'ダイアログ表示
     .Show
@@ -253,22 +253,24 @@ With fd
     
     Dim Paths(2) As String, CurrentPath As String, i As Long
     
-    '選択されたファイルパスを、Amazon・楽天・ヤフーをキーとしたコレクションに入れ直す
+    '選択されたファイルパスから中身調べてモール毎にセット
     For i = 1 To .SelectedItems.Count
         CurrentPath = .SelectedItems.Item(i)
         
-        Select Case True
-            Case CurrentPath Like "*A*"
+        Select Case InspectCsv(CurrentPath)
+            Case "Amazon"
                 Paths(0) = CurrentPath
             
-            Case CurrentPath Like "*R*"
+            Case "楽天"
                 Paths(1) = CurrentPath
                 
-            Case CurrentPath Like "*Y*"
+            Case "Yahoo"
                 Paths(2) = CurrentPath
             
         End Select
+        
     Next
+    
 End With
 
 GetCsvPath = Paths
@@ -288,3 +290,40 @@ End If
 Set GetDestRange = r
 
 End Function
+
+Private Function InspectCsv(ByVal Path As String) As String
+
+'引数のパスにテキストストリームで接続してヘッダーを調べ、モール名を返す。
+Dim FSO As Object, TS As Object, i As Long, CurrentMall As String, CurrentRow As Variant
+
+Set FSO = CreateObject("Scripting.FileSystemObject")
+Set TS = FSO.OpenTextFile(Path)
+        
+Do Until TS.AtEndOfStream Or i > 3
+    CurrentRow = TS.ReadLine
+    
+    'タブがあればAmazon
+    If InStr(CurrentRow, Chr(9)) > 0 Then
+        CurrentMall = "Amazon"
+        Exit Do
+    
+    '受注番号 の文言があれば楽天
+    ElseIf InStr(CurrentRow, "受注番号") > 0 Then
+        CurrentMall = "楽天"
+        Exit Do
+        
+    'OrderId の文言があればヤフー
+    ElseIf InStr(CurrentRow, "OrderId") > 0 Then
+        CurrentMall = "Yahoo"
+        Exit Do
+    
+    End If
+    
+    i = i + 1
+
+Loop
+
+InspectCsv = CurrentMall
+
+End Function
+
