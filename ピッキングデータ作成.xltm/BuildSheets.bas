@@ -243,12 +243,12 @@ With ForSlimsSheet
 
     If MallName = "Amazon" Then
         .Columns("G").Insert
-        .Range("G1").Value = "‘——¿"
-        .Range(Cells(2, 7), Cells(ForSlimsSheet.UsedRange.Rows.Count, 7)).Value = 0
+        .Range("G2").Value = "‘——¿"
+        .Range(Cells(3, 7), Cells(ForSlimsSheet.UsedRange.Rows.Count, 7)).Value = 0
     End If
 
     'Œrüˆø‚¢‚Ä•Û‘¶
-    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    .Range("A2:I2").Resize(Range("B2").CurrentRegion.Rows.Count - 1, 9).Borders.LineStyle = xlContinuous
     
 End With
 ForSlimsBook.Close SaveChanges:=True
@@ -264,7 +264,7 @@ With NoEntryItemSheet
     End If
     
     'Œrüˆø‚¢‚Ä•Û‘¶
-    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    .Range("A2:I2").Resize(Range("B2").CurrentRegion.Rows.Count - 1, 9).Borders.LineStyle = xlContinuous
     
 End With
 NoEntryItemBook.Close SaveChanges:=True
