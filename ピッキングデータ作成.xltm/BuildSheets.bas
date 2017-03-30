@@ -182,15 +182,18 @@ Do
 
     '提出するコードの振替
     'SLIMSに投入するのはロケーション有りの6ケタのみ
-    Dim OrderedCode As String, AddinResultCode As String, Code As String
+    Dim OrderedCode As String, ForAddinCode As String, AddinResultCode As String, Code As String
     
     OrderedCode = CStr(Range("B" & i).Value)
+    ForAddinCode = CStr(Range("I" & i).Value)
     AddinResultCode = CStr(Range("M" & i).Value)
     
-    If AddinResultCode = "" Then
-        Code = OrderedCode
-    Else
+    If AddinResultCode <> "" Then
         Code = AddinResultCode
+    ElseIf ForAddinCode <> "" Then
+        Code = ForAddinCode
+    Else
+        Code = OrderedCode
     End If
     
     '配列に提出ファイル1行分のデータを格納
