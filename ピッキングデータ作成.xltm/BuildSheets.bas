@@ -282,7 +282,7 @@ Dim SavePath As String, SaveFolder As String
 
 '保存先と保存ファイル名の決定
 
-'ネット販売のフォルダに繋がるか
+'ネット販売のフォルダに繋がるか判定
 If Dir(PICKING_FOLDER, vbDirectory) <> "" Then
     SaveFolder = PICKING_FOLDER
 Else
@@ -292,15 +292,7 @@ End If
 
 'あす楽・プライム分のピッキングか？
 If Main.IsSecondPicking = True Then
-    
     BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
-
-    If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
-        'ARファイルが既にある場合は時刻を付ける
-        BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
-        
-    End If
-
 End If
 
 '時刻保存のフラグがあるか
@@ -308,24 +300,20 @@ If Main.IsTimeStampMode = True Then
     BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
+'ファイルがあって､あす楽プライム分のピッキングでない時のみ､選択ダイアログを表示
 If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" And Main.IsSecondPicking = False Then
-    'ファイルがあって､あす楽プライム分のピッキングでない時のみ､選択ダイアログを表示
+    
     Dim IsAR As Integer
     IsAR = MsgBox(prompt:="本日分のファイルが既に存在します。" & vbLf & "あす楽・プライム分として保存しますか？", _
             Buttons:=vbExclamation + vbYesNo)
     
+    'あす楽プライムモードのフラグを立てる
     If IsAR = vbYes Then
         BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "AR"))
         Main.IsSecondPicking = True
-        
-        If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
-            'ARファイルが既にある場合は時刻を付ける
-            BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
-        End If
-        
+    
+    'あす楽プライム分でないとき、時刻を含めたファイル名保存フラグを立てる
     Else
-        
-        'あす楽プライム分でないとき、時刻を含めたファイル名モードとする
         BookName = Replace(BookName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
         Main.IsTimeStampMode = True
     
@@ -334,8 +322,15 @@ If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" And Main.IsSecondPicking = Fal
 End If
     
 '上記条件に全てヒットしない場合は、当日1回目の生成となり、BookNameは変更されていない。
+
+If Dir(PICKING_FOLDER & BookName & ".xlsx") <> "" Then
+    '保存しようとするファイル名で、既にファイルがある場合ファイル名を日付-時刻とする
+    BookName = Replace(BookName, Format(Date, "MMdd"), (Format(Date, "MMdd") & "-" & Format(Time, "hhmm")))
+End If
+
 SavePath = SaveFolder & BookName
 
+ActiveWorkbook.Sheets(1).Name = BookName
 ActiveWorkbook.SaveAs Filename:=SavePath, FileFormat:=xlWorkbookDefault
 
 Set PreparePickingBook = ActiveWorkbook
