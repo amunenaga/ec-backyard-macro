@@ -101,10 +101,15 @@ ElseIf Code Like String(13, "#") Then
     
     FixedCode = Code
     
-'7ケタ～13ケタ以下の場合、13ケタになるよう数字を修正。ハイフンは引っかからないが、残しておいてよい
-Else
-    
+'数字7ケタ以上12ケタなら、13ケタになるよう先頭に0を追記
+ElseIf Code Like (String(7, "#") & "*") And Len(Code) <= 12 Then
+
     FixedCode = String(13 - Len(Code), "0") & Code
+    
+Else
+'どの条件にも一致しない場合でも、値は返す
+    
+    FixedCode = Code
     
 End If
 
