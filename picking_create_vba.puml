@@ -31,17 +31,18 @@ CSV <- LoadCsv : データ接続
 entity OrderSheet
 
 LoadCsv -> OrderSheet : 受注データ取込
-LoadCsv -> OrderSheet : フォーマット修正
+deactivate LoadCsv
+
+Main -> DataValidate : FixForAddin()
+activate DataValidate
+DataValidate -> OrderSheet : フォーマット修正
 
 participant SetParser
 
-note right
-    商品名変更が必要な可能性アリ
-     ≪SS≫を中身ごと削除する
-     冒頭○文字以内の[]を削除する、など
-end note
+DataValidate -> SetParser : ○個組分解 Sub ParseScalingItem()
 
-LoadCsv -> SetParser : ○個組分解 Sub ParseScalingItem()
+deactivate DataValidate
+
 |||
 activate SetParser
 
@@ -50,8 +51,8 @@ SetParser -> OrderSheet : 単体数量上書
 SetParser -> OrderSheet : 単体コード上書
 deactivate SetParser
 
-LoadCsv -> SetParser : 7777 セット分解 Sub ParseItems()
-deactivate LoadCsv
+Main -> SetParser : 7777 セット分解 Sub ParseItems()
+
 activate SetParser
 
 ｾｯﾄ商品ﾘｽﾄ.xls <-- SetParser : 77777xxxxxコード 検索
