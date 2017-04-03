@@ -3,7 +3,30 @@ Option Explicit
 
 Const TIED_ITEM_LIST_BOOK As String = "ｾｯﾄ商品ﾘｽﾄ.xls"
 Const LIST_BOOK_FOLDER As String = "\\server02\商品部\ネット販売関連\"
-Sub ParseItems(r As Range)
+Sub SetParse7777()
+'77777 セット分解  行の挿入を伴う処理なので単体で全レコードへ行う
+
+Worksheets("受注データシート").Activate
+
+Dim ForAddinRange As Range, c As Range
+Set ForAddinRange = Range(Cells(2, 9), Cells(Range("B1").SpecialCells(xlCellTypeLastCell).Row, 9))
+
+For Each c In ForAddinRange
+    '7777始まりセット分解
+    If c.Value Like "7777*" Then
+
+        Call SetParser.ParseItems(c)
+    
+    End If
+    
+Next c
+
+'セット商品ブックを閉じる
+Call SetParser.CloseSetMasterBook
+
+End Sub
+
+Private Sub ParseItems(r As Range)
 
 'セット商品リストのブックを開く
 Call OpenListBook

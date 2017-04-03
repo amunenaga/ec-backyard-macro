@@ -1,6 +1,35 @@
 Attribute VB_Name = "DataValidate"
 Option Explicit
+Sub FixForAddin()
 
+Worksheets("受注データシート").Activate
+
+Dim CodeRange As Range, c As Range
+Set CodeRange = Range(Cells(2, 2), Cells(Range("B1").SpecialCells(xlCellTypeLastCell).Row, 2))
+
+'アドイン用のコードを記入する
+For Each c In CodeRange
+    
+    Dim CurrentCodeCell As Range
+    Set CurrentCodeCell = c
+    
+    'I列、アドイン実行用に6ケタ化したコード、もしくはJANを入れる
+    Cells(c.Row, 9).NumberFormatLocal = "@"
+    Cells(c.Row, 9).Value = DataValidate.ValidateCode(c.Value)
+    
+    '必要数量、一旦受注の数量で埋める。セット分解後に書き換えられる。
+    Cells(c.Row, 10).Value = Cells(c.Row, 4).Value
+
+    '○個組分解
+    If c.Value Like "*-*" Then
+    
+        Call SetParser.ParseScalingSet(c)
+    
+    End If
+
+Next
+
+End Sub
 Sub FilterLocation(Optional ByVal arg As Boolean)
 'アドインで取得したデータを修正する
 'エクセルのマクロ一覧に出さないようにするため引数付きとしている。
@@ -45,5 +74,40 @@ Reg.Pattern = "^((≪|【).*?(】|≫))*"
 Name = Reg.Replace(Name, "")
 
 ValidateName = Name
+
+End Function
+
+Function ValidateCode(Code As String) As String
+
+Dim FixedCode As String
+
+'アルファベットを削除
+Dim Reg As New RegExp
+Reg.Global = True
+Reg.Pattern = "[a-zA-Z]"
+Code = Reg.Replace(Code, "")
+
+'6ケタならそのまま入れる
+If Code Like String(6, "#") Then
+    FixedCode = Code
+
+'数字5ケタは頭にゼロを追記
+ElseIf Code Like String(5, "#") Then
+    
+    FixedCode = "0" & Code
+
+'JANもそのまま入れる
+ElseIf Code Like String(13, "#") Then
+    
+    FixedCode = Code
+    
+'7ケタ～13ケタ以下の場合、13ケタになるよう数字を修正。ハイフンは引っかからないが、残しておいてよい
+Else
+    
+    FixedCode = String(13 - Len(Code), "0") & Code
+    
+End If
+
+ValidateCode = FixedCode
 
 End Function

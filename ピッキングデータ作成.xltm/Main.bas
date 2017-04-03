@@ -27,6 +27,10 @@ ShowProgress.StepMessageLabel = "CSV読込中"
 
 Call LoadCsv
 
+'アドイン用にコード修正、セット分解
+Call DataValidate.FixForAddin
+Call SetParser.SetParse7777
+
 ShowProgress.ProgressBar.Value = 3
 ShowProgress.StepMessageLabel = "ロケーションデータ取得中"
 Application.Wait Now + TimeValue("00:00:02")
