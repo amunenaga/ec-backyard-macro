@@ -33,9 +33,9 @@ entity OrderSheet
 LoadCsv -> OrderSheet : 受注データ取込
 deactivate LoadCsv
 
-Main -> DataValidate : FixForAddin()
+Main -> DataValidate : FixForAddin() 社内DBと照合のためにコード修正
 activate DataValidate
-DataValidate -> OrderSheet : フォーマット修正
+DataValidate -> OrderSheet : 照合用コード書込
 
 participant SetParser
 
@@ -58,9 +58,7 @@ activate SetParser
 ｾｯﾄ商品ﾘｽﾄ.xls <-- SetParser : 77777xxxxxコード 検索
 ｾｯﾄ商品ﾘｽﾄ.xls --> SetParser : 構成商品コレクション
 
-Loop 構成商品 1つにつき1行挿入
-    SetParser -> OrderSheet : アイテム行挿入
-end
+SetParser -> OrderSheet : アイテム行挿入
 
 deactivate SetParser
 
