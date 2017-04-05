@@ -58,20 +58,44 @@ For Each Mall In Malls
         
     ProgressStep = ProgressStep + 1
     ShowProgress.ProgressBar.Value = ProgressStep
-    ShowProgress.StepMessageLabel = Mall & "データ処理中"
+    ShowProgress.StepMessageLabel = Mall & "ピッキング作成中"
     
     'モール毎の受注件数がゼロ件ならファイル生成しない。
-    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue
+    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue1
     
     'ピッキングシート作成・保存
     Call BuildSheets.OutputPickingData(CStr(Mall))
+
+
+Continue1:
+
+Next
+
+'振分用セット商品リストをコード昇順にするために、ソート
+Call OrderSheet.SortAscend("受注時商品コード")
+
+For Each Mall In Malls
+        
+    ProgressStep = ProgressStep + 1
+    ShowProgress.ProgressBar.Value = ProgressStep
+    ShowProgress.StepMessageLabel = Mall & "振分シート作成中"
+    
+    'モール毎の受注件数がゼロ件ならファイル生成しない。
+    If WorksheetFunction.CountIf(OrderSheet.Range("F:F"), Mall & "*") = 0 Then GoTo Continue2
     
     '振分け用シート作成
     Call BuildSheets.CreateSorterSheet(CStr(Mall))
 
-Continue:
+Continue2:
 
 Next
+
+Call OrderSheet.SortAscend("管理番号")
+
+'受注データシートでの処理終了、シート保護をかける
+OrderSheet.Activate
+OrderSheet.Range("A1").Select
+OrderSheet.Protect
 
 'シート削除、保存時のアラートダイアログを抑止
 Application.DisplayAlerts = False

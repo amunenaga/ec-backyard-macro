@@ -6,7 +6,6 @@ Sub CreateSorterSheet(MallName As String)
 'テンプレートシートを2回コピー、単体商品とセット商品用を用意する。
 '受注データのシートを2～最終行まで、受注モール・受注時コードを判定しつつシートへコピー
 
-
 '単体商品の振分け用シートを用意
 Worksheets("振分用テンプレート").Copy after:=Worksheets(Worksheets.Count)
 With ActiveSheet
