@@ -1,6 +1,9 @@
 Attribute VB_Name = "DataValidate"
 Option Explicit
 Sub FixForAddin()
+'社内DBと照合できるように受注データシートに対して、受注商品コード列のコードをアドイン用商品コードへ転記する。
+'○個組セット分解もここで行う。
+
 
 Worksheets("受注データシート").Activate
 
@@ -31,8 +34,7 @@ Next
 
 End Sub
 Sub FilterLocation(Optional ByVal arg As Boolean)
-'アドインで取得したデータを修正する
-'エクセルのマクロ一覧に出さないようにするため引数付きとしている。
+'受注データシートの全ての行に対して、ロケーション列から無効なロケーション文字を削除して有効ロケーション列へ転記。
 
 OrderSheet.Activate
 
@@ -49,7 +51,7 @@ Next
 End Sub
 
 Function CutOffUnlocation(Location As String) As String
-' 正規表現でロケーション[0-0-0-0][0- -0- - ][1-0-0-0-0]などを削除して返します。
+'正規表現でロケーション[0-0-0-0][0- -0- - ][1-0-0-0-0]などを削除して返します。
 
 Dim Reg As New RegExp
 
@@ -61,6 +63,9 @@ CutOffUnlocation = Reg.Replace(Location, "")
 End Function
 
 Function ValidateName(Name As String) As String
+'正規表現で商品名の修正。
+'カンマ・ピリオドなどを削除、冒頭の【】≪≫で括られた楽天のセール文言削除
+
 
 Dim Reg As New RegExp
 
@@ -78,6 +83,7 @@ ValidateName = Name
 End Function
 
 Function ValidateCode(Code As String) As String
+'コードを受け取って、数字以外を削除・13ケタ/6ケタに足りない場合は冒頭0を補完したコードを返す
 
 Dim FixedCode As String
 

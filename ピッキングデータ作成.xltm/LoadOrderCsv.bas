@@ -2,7 +2,8 @@ Attribute VB_Name = "LoadOrderCsv"
 Option Explicit
 
 Sub LoadCsv(Optional ByVal bool As Boolean)
-'クロスモールからダウンロードしたCSV読込
+'クロスモールからダウンロードしたCSVの読込
+'ファイル指定ダイアログを表示し、ネット販売関連\ピッキング\クロスモール\のCSVを指定する。
 
 'クロスモールのCSVをダウンロードしているフォルダへ移動、ファイル指定ダイアログを開く
 '@url http://officetanaka.net/other/extra/tips15.htm
@@ -60,7 +61,9 @@ With ActiveSheet.QueryTables.Add(Connection:= _
     .Refresh BackgroundQuery:=True
 End With
 
+'CSVへのデータ接続削除、クエリーテーブルに名前が付くので削除
 ActiveWorkbook.Connections(1).Delete
+ActiveWorkbook.Names(1).Delete
 
 'クロスモールのCSVが読み込まれたかチェック クロスモール側で採番する連番は数字8ケタ
 If Not Range("A2").Value Like String(8, "#") Then

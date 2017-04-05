@@ -6,6 +6,7 @@ Public IsSecondPicking As Boolean
 Public IsTimeStampMode As Boolean
 
 Sub ピッキング_振分作成()
+'ボタンから起動するプロシージャ
 
 OrderSheet.Activate
 

@@ -3,7 +3,8 @@ Option Explicit
 
 Const TIED_ITEM_LIST_BOOK As String = "ｾｯﾄ商品ﾘｽﾄ.xls"
 Const LIST_BOOK_FOLDER As String = "\\server02\商品部\ネット販売関連\"
-Sub SetParse7777()
+
+Sub SetParse7777(Optional ByVal arg As Boolean)
 '77777 セット分解  行の挿入を伴う処理なので単体で全レコードへ行う
 
 Worksheets("受注データシート").Activate
@@ -27,6 +28,7 @@ Call SetParser.CloseSetMasterBook
 End Sub
 
 Private Sub ParseItems(r As Range)
+'セット分解プロシージャ単体
 
 'セット商品リストのブックを開く
 Call OpenListBook
@@ -44,6 +46,7 @@ Call InsertComponetRow(r, ComponentItems)
 End Sub
 
 Private Sub InsertComponetRow(c As Range, ComponentItems As Collection)
+'挿入するレンジと、セット構成商品の配列を受けて、コードレンジの下にセット商品の行を足してセット商品のコード・商品名・数量を書き出す。
 
 Dim i As Long
 For i = 1 To ComponentItems.Count
@@ -194,6 +197,7 @@ ret:
 End Sub
 
 Function CloseSetMasterBook(Optional ByVal arg As Variant) As Boolean
+'セット商品のリストを閉じる
 
 Dim wb As Workbook
 
@@ -210,6 +214,7 @@ Next
 End Function
 
 Sub ParseScalingSet(r As Variant)
+'○個組のセットを単体コードと必要数量に分解し、アドイン用商品コード列、必要数量列へ転記
 
 Dim Code As String, FixedCode As String
 Dim Reg As New RegExp
