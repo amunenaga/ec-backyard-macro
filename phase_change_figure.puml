@@ -51,11 +51,12 @@ activate リスト出力待ち
 リスト出力待ち -> 発送待ち :あす楽・プライム 付箋フィルター
 deactivate リスト出力待ち
 
-== 16:30～ 出荷処理 ==
+== 16:30～ 出荷〆処理 ==
 
 発送待ち -> 発送済
 
 deactivate 発送待ち
+
 activate 発送済
 
 [-> 発送済 :e飛伝 送り状番号
@@ -65,11 +66,9 @@ activate 発送済
 
 boundary 出荷確認.xlsm
 
-発送済 -> 出荷確認.xlsm :Amazonアップロード用
-発送済 -> 出荷確認.xlsm :楽天アップロード用
-発送済 -> 出荷確認.xlsm :Yahoo!アップロード用
-
-deactivate 発送済
+発送済 -> 出荷確認.xlsm :Amazonアップロード用CSV
+発送済 -> 出荷確認.xlsm :楽天アップロード用CSV
+発送済 -> 出荷確認.xlsm :Yahoo!アップロード用CSV
 
 出荷確認.xlsm -> 配送でPON : ヤマト運輸 送り状番号
 出荷確認.xlsm -> 配送でPON : 佐川急便 送り状番号
@@ -85,5 +84,9 @@ end box
 出荷確認.xlsm -> 発送済 : 未集荷削除
 
 発送済 -> 完了
+
+deactivate 発送済
+
+activate 完了
 
 @enduml
