@@ -18,7 +18,7 @@ End If
 'プログレスバーの準備
 With ShowProgress
     .ProgressBar.Min = 1
-    .ProgressBar.Max = 8
+    .ProgressBar.Max = 15
 
     .Show vbModeless
 End With
@@ -40,9 +40,6 @@ Application.Wait Now + TimeValue("00:00:02")
 'DB接続、ロケーション取得、受注データの修正
 Call ConnectDB.Make_List
 Call DataValidate.FilterLocation
-
-'受注データシートでの処理終了、シート保護をかける
-OrderSheet.Protect
 
 'モール毎の電算室提出データ保存、振分けシート作成
 
@@ -104,7 +101,7 @@ Application.DisplayAlerts = False
 Worksheets("ピッキングシート提出用テンプレート").Delete
 Worksheets("振分用テンプレート").Delete
 
-ShowProgress.ProgressBar.Value = 7
+ShowProgress.ProgressBar.Value = 14
 ShowProgress.StepMessageLabel = Mall & "保存処理中"
 
 Dim DeskTop As String, SaveFileName As String, SavePath As String
@@ -138,7 +135,7 @@ Else
 
 End If
 
-ShowProgress.ProgressBar.Value = 8
+ShowProgress.ProgressBar.Value = 15
 ShowProgress.StepMessageLabel = Mall & "振分シート プリント"
 
 '実行PCデフォルトのプリンタでプリントアウト
