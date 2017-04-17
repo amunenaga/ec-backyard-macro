@@ -5,11 +5,25 @@ skinparam packageFontSize 25
 
 title フェーズ遷移図
 
+box "梱包室PC内" #white
+entity ヤマトB2端末
+entity 佐川e飛伝
+end box
+
+box "CROSS MALL" #white
+participant 注文確認
+participant リスト出力待ち
+participant 発送待ち
+participant 発送済
+participant 削除
+participant 完了
+end box
+
 == 8:00～ 朝の受注取込 ==
 
 activate 注文確認
 [<- 注文確認 :納品書出力
-[<- 注文確認 :ヤマトB2 CSVダウンロード
+ 注文確認 :ヤマトB2 CSVダウンロード
 [<- 注文確認 :e飛伝用CSVダウンロード
 
 注文確認 -> リスト出力待ち
@@ -26,15 +40,6 @@ activate 発送待ち
 発送待ち -> 削除 :注文キャンセル時 随時移動
 
 == 13:30～ あす楽・プライム取込 ==
-
-box "CROSS MALL" #white
-participant 注文確認
-participant リスト出力待ち
-participant 発送待ち
-participant 発送済
-participant 削除
-participant 完了
-end box
 
 activate 注文確認
 [<- 注文確認 :納品書出力
