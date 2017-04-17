@@ -1,9 +1,8 @@
 Attribute VB_Name = "DataValidate"
 Option Explicit
-Sub FixForAddin()
+Sub FixForAddin(Optional ByVal arg As Boolean)
 '社内DBと照合できるように受注データシートに対して、受注商品コード列のコードをアドイン用商品コードへ転記する。
 '○個組セット分解もここで行う。
-
 
 Worksheets("受注データシート").Activate
 
