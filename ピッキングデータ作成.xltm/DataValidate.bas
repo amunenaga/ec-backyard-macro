@@ -55,7 +55,9 @@ Function CutOffUnlocation(Location As String) As String
 Dim Reg As New RegExp
 
 Reg.Global = True
-Reg.Pattern = "\[[0-9|\s]\-[0,1,2|\s]\-[0|\s]\-[0|\s]\-[0|\s]\]"
+
+'ロケーションの並び 階-通路-棚番-段-順  棚番はA～Qアルファベット
+Reg.Pattern = "\[[0-9|\s]\-[0-2|\s]\-[0-9|\s]\-[0|\s]\-[0|\s]\]"
 
 CutOffUnlocation = Reg.Replace(Location, "")
 
