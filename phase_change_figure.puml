@@ -6,8 +6,8 @@ skinparam packageFontSize 25
 title フェーズ遷移図
 
 box "梱包室PC内" #white
-entity ヤマトB2端末
-entity 佐川e飛伝
+entity ヤマトB2アプリ
+entity e飛伝アプリ
 end box
 
 box "CROSS MALL" #white
@@ -23,14 +23,15 @@ end box
 
 activate 注文確認
 [<- 注文確認 :納品書出力
- 注文確認 :ヤマトB2 CSVダウンロード
-[<- 注文確認 :e飛伝用CSVダウンロード
+ヤマトB2アプリ <- 注文確認 :ヤマトB2 CSVダウンロード
+e飛伝アプリ <- 注文確認 :e飛伝用CSVダウンロード
 
 注文確認 -> リスト出力待ち
 deactivate 注文確認
 
 activate リスト出力待ち
 [<- リスト出力待ち : ピッキングCSVダウンロード
+[<- リスト出力待ち : Thanksメール送信
 
 リスト出力待ち -> 発送待ち
 deactivate リスト出力待ち
@@ -43,8 +44,8 @@ activate 発送待ち
 
 activate 注文確認
 [<- 注文確認 :納品書出力
-[<- 注文確認 :ヤマトB2 CSVダウンロード
-[<- 注文確認 :e飛伝用CSVダウンロード
+ヤマトB2アプリ <- 注文確認 :ヤマトB2 CSVダウンロード
+e飛伝アプリ <- 注文確認 :e飛伝用CSVダウンロード
 
 注文確認 -> リスト出力待ち
 deactivate 注文確認
@@ -64,8 +65,8 @@ deactivate 発送待ち
 
 activate 発送済
 
-[-> 発送済 :e飛伝 送り状番号
-[-> 発送済 :ヤマトB2 送り状番号
+ヤマトB2アプリ -> 発送済 :ヤマトB2 送り状番号
+e飛伝アプリ -> 発送済 :e飛伝 送り状番号
 
 [<- 発送済 : ○件中△件 処理件数通知メール
 
