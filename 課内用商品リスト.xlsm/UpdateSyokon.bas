@@ -9,12 +9,12 @@ Type Syokon
     
 End Type
 
-Sub SKUがJANを商魂6ケタで置き換え()
+Sub SKUがJANを6ケタで置き換え()
 
 '元のエクセルブック名、元シートの範囲は毎回指定のこと
 'イミディエイトで、Workbooks(1).nameでワークブック名が確認できる。
 Dim Rng As Range
-Set Rng = Workbooks("6ケタ-JANリスト0309.xlsx").Sheets(1).Range("A2:A50200")
+Set Rng = Workbooks("JANリスト.xlsx").Sheets(1).Range("A2:A50200")
 
 Dim r As Range
 For Each r In Rng
@@ -28,7 +28,7 @@ For Each r In Rng
     sy.Code = r.Value
     sy.Jan = r.Offset(0, 2)
     
-    '9始まり、1始まり6ケタは資材・什器のため飛ばす
+    '9始まり、1始まり6ケタは飛ばす
     If sy.Code Like "09#####" Or sy.Code Like "01#####" Then
         
         GoTo continue
@@ -51,7 +51,7 @@ Private Sub UpdateJan(Syokon As Syokon)
 Dim c As Range
 
 'A列の該当JANを探す
-With Workbooks("発注用商品情報.xlsm").Worksheets("商品情報").Columns(1)
+With Workbooks("商品リスト.xlsm").Worksheets("商品情報").Columns(1)
 
 '完全一致で
 Set c = .Find(what:=Syokon.Jan, LookIn:=xlValues, LookAt:=xlWhole)
@@ -93,7 +93,7 @@ End With
 
 End Sub
 
-Sub 商魂の仕入先に合わせる()
+Sub 社内マスターの仕入先に合わせる()
 
 Dim FinalRow As Long, i As Long
 FinalRow = Worksheets("商品情報").UsedRange.Rows.Count
