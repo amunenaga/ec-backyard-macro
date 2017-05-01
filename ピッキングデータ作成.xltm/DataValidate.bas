@@ -57,7 +57,7 @@ Dim Reg As New RegExp
 Reg.Global = True
 
 'ロケーションの並び 階-通路-棚番-段-順  棚番はA～Qアルファベット
-Reg.Pattern = "\[[0-9|\s]\-[0-2|\s]\-[0-9|\s]\-[0|\s]\-[0|\s]\]"
+Reg.Pattern = "\[[0-9|\s]\-[0-2|\s]\-[0-9|\s]\-[0|\s]\-(([0-9]{1,})|\s)\]"
 
 CutOffUnlocation = Reg.Replace(Location, "")
 
