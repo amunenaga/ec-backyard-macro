@@ -1,5 +1,5 @@
 Attribute VB_Name = "ConnectDB"
-Sub Make_List()
+Sub Make_List(Optional ByVal arg As Boolean)
 'DBへ接続して、商品マスタ・在庫マスタからロケーション・現在庫を取得
 '在庫マスタがない場合は、商品マスタより社内コードとJANのみ取得
 'ベース作成：商品部
@@ -107,15 +107,13 @@ For Loop_Count = Target_RowBase To Target_RowEnd
         Loop
         
         Cells(Loop_Count, OutPut_ColBase + 3).Value = Loc_Text
-        
     End If
+    
 Next Loop_Count
     
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
 
-    'Cells.Select
-    'Cells.EntireColumn.AutoFit
     Range("A1").Select
 
 DB_Cnn.Close
