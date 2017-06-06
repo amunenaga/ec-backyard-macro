@@ -3,40 +3,38 @@ Option Explicit
 
 Sub SumPuchaseRequest()
 
+Worksheets("手配数量決定シート").Activate
+
 'セラー分の商品コードを重複なしでコピー
 'URL http://www.eurus.dti.ne.jp/yoneyama/Excel/vba/vba_jyufuku.html
-
-Worksheets("セラー分").Range("C2:C48").AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("B2")
+Worksheets("セラー分").Range("C2:C" & Worksheets("セラー分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("G2")
 
 '手配件数の合計略号と、手配依頼数の合計を入れる
 Dim r As Range, CodeRange As Range, Endrow As Long
-Endrow = Cells(1, 2).SpecialCells(xlLastCell).Row
-Set CodeRange = Range(Cells(2, 2), Cells(Endrow, 2))
+Endrow = Cells(1, 7).SpecialCells(xlLastCell).Row
+Set CodeRange = Range(Cells(2, 7), Cells(Endrow, 7))
 
 For Each r In CodeRange
-    r.Offset(0, -1).Value = BuildMark(r.Value)
+    r.Offset(0, -1).Value = CountMallOrder(r.Value)
     r.Offset(0, 2).Value = SumRequestQuantity(r.Value, True)
 Next
 
 '卸分の手配依頼数量の合計を算出
 '卸分の商品コードを入れる
-Worksheets("卸分").Range("C2:C5").AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("B46")
+Worksheets("卸分").Range("C2:C" & Worksheets("卸分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("G" & Endrow + 1)
 
-Range("A2").End(xlDown).Offset(1, 1).Select
-Range(Selection, Selection.End(xlDown)).Offset(0, -1).Select
-Selection.Value = "V"
+Dim WholeSaleJanRange As Range
+Set WholeSaleJanRange = Range(Cells(Endrow + 1, 7), Cells(2, 7).End(xlDown))
 
-Dim WholeSaleRange As Range
+WholeSaleJanRange.Offset(0, -1).Value = "V"
 
-Set WholeSaleRange = Selection.Offset(0, 1)
-
-For Each r In WholeSaleRange
+For Each r In WholeSaleJanRange
     r.Offset(0, 2).Value = SumRequestQuantity(r.Value, False)
 Next
 
 End Sub
 
-Private Function BuildMark(ByVal Code As String) As String
+Private Function CountMallOrder(ByVal Code As String) As String
 
 Dim Counter(3) As Long, Mall As String, FoundCode As String, Endrow As Long, k As Long, Mark As String
 
@@ -73,7 +71,7 @@ Mark = Mark & IIf(Counter(3) > 0, "SP" & Counter(3), "")
 'このままだとA1というように、1件の時も数字が出るので、1は削除
 Mark = Replace(Mark, "1", "")
 
-BuildMark = Mark
+CountMallOrder = Mark
 
 End Function
 
