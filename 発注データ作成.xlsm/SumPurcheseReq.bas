@@ -7,7 +7,7 @@ Worksheets("手配数量決定シート").Activate
 
 'セラー分の商品コードを重複なしでコピー
 'URL http://www.eurus.dti.ne.jp/yoneyama/Excel/vba/vba_jyufuku.html
-Worksheets("セラー分").Range("C2:C" & Worksheets("セラー分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("G2")
+Worksheets("セラー分").Range("C2:D" & Worksheets("セラー分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, CriteriaRange:=Range("C2:C" & Worksheets("セラー分").UsedRange.Rows.Count), Unique:=True, CopyToRange:=Range("G2")
 
 '手配件数の合計略号と、手配依頼数の合計を入れる
 Dim r As Range, CodeRange As Range, Endrow As Long
@@ -21,7 +21,7 @@ Next
 
 '卸分の手配依頼数量の合計を算出
 '卸分の商品コードを入れる
-Worksheets("卸分").Range("C2:C" & Worksheets("卸分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("G" & Endrow + 1)
+Worksheets("卸分").Range("C2:D" & Worksheets("卸分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, CriteriaRange:=Range("C2:C" & Worksheets("セラー分").UsedRange.Rows.Count), Unique:=True, CopyToRange:=Range("G" & Endrow + 1)
 
 Dim WholeSaleJanRange As Range
 Set WholeSaleJanRange = Range(Cells(Endrow + 1, 7), Cells(2, 7).End(xlDown))
