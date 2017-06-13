@@ -1,50 +1,58 @@
 Attribute VB_Name = "FetchDataForPuchase"
 Option Explicit
-Sub FetchSyokonData()
-'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ï¿½[ï¿½Ìƒfï¿½[ï¿½^ï¿½æ“¾
-'ï¿½ï¿½ï¿½Û‚É“Ç‚İ‚Ésï¿½ï¿½ï¿½eï¿½[ï¿½uï¿½ï¿½ï¿½ÍAï¿½ó’Ú×Šmï¿½Fï¿½pï¿½É–ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½vï¿½ï¿½ï¿½Pï¿½[ï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Server3ï¿½ï¿½ECï¿½Û—pï¿½}ï¿½Xï¿½^
 
-'ï¿½Ú‘ï¿½ï¿½Ì‚ï¿½ï¿½ß‚ÌƒIï¿½uï¿½Wï¿½Fï¿½Nï¿½gï¿½ï¿½ï¿½`ï¿½ADBï¿½Ú‘ï¿½ï¿½İ’ï¿½ï¿½Zï¿½bï¿½g
+Sub CreateQuantitySheet()
+
+Call LoadAllPicking
+Call SumPuchaseRequest
+
+'”­’‚É•K—v‚Èî•ñ‚ğƒf[ƒ^ƒx[ƒXEExcelƒtƒ@ƒCƒ‹‚©‚çæ“¾
+Call FetchSyokonData
+Call FetchExcellForPurchase
+
+Call CalcPurchaseQuantity
+
+End Sub
+
+Sub FetchSyokonData()
+'¤°¤•iƒ}ƒXƒ^[‚Ìƒf[ƒ^æ“¾
+'ÀÛ‚É“Ç‚İ‚És‚­ƒe[ƒuƒ‹‚ÍAó’Ú×Šm”F—p‚É–ˆ’©ƒŒƒvƒŠƒP[ƒVƒ‡ƒ“‚ğì‚éServer3‚ÌEC‰Û—pƒ}ƒXƒ^
+
+'Ú‘±‚Ì‚½‚ß‚ÌƒIƒuƒWƒFƒNƒg‚ğ’è‹`ADBÚ‘±İ’è‚ğƒZƒbƒg
 Dim DbCnn As New ADODB.Connection
 Dim DbCmd  As New ADODB.Command
 Dim DbRs As New ADODB.Recordset
 
 DbCnn.ConnectionTimeout = 0
-DbCnn.Open "PROVIDER=SQLOLEDB;Server=;Database=;UID=;PWD=;"
+DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
 DbCmd.CommandTimeout = 180
 Set DbCmd.ActiveConnection = DbCnn
 
-'ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½hï¿½Ìƒï¿½ï¿½ï¿½ï¿½Wï¿½ï¿½Zï¿½bï¿½gï¿½A1ï¿½Zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SQLï¿½ï¿½ï¿½s
+'¤•iƒR[ƒh‚ÌƒŒƒ“ƒW‚ğƒZƒbƒgA1ƒZƒ‹‚¸‚ÂSQLÀs
 Dim CodeRange As Range, r As Range
 Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
 
 For Each r In CodeRange
     Dim sql As String, Code As String
     Code = r.Value
-    
-    If Code Like String(13, "#") Then
         
-    Else
-    
-    End If
-    
-    sql = "SELECT ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h, ï¿½æˆµï¿½æ•ª, ï¿½ï¿½ï¿½bï¿½gï¿½ï¿½, ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½dï¿½ï¿½ï¿½ï¿½, ï¿½dï¿½ï¿½ï¿½ï¿½}ï¿½Xï¿½^.ï¿½dï¿½ï¿½ï¿½æ—ªï¿½ï¿½ " & _
-          "FROM ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^ JOIN ï¿½dï¿½ï¿½ï¿½ï¿½}ï¿½Xï¿½^ ON ï¿½ï¿½ï¿½iï¿½}ï¿½Xï¿½^.ï¿½dï¿½ï¿½ï¿½ï¿½ = ï¿½dï¿½ï¿½ï¿½ï¿½}ï¿½Xï¿½^.ï¿½dï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½h " & _
-          "WHERE ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h = " & Code & "OR JANï¿½Rï¿½[ï¿½h = '" & Code & "'"
+    sql = "SELECT ¤•iƒR[ƒh, æˆµ‹æ•ª, ƒƒbƒg”, d“üŒ´‰¿, d“üæ, d“üæƒ}ƒXƒ^.d“üæ—ªÌ " & _
+          "FROM ¤•iƒ}ƒXƒ^ JOIN d“üæƒ}ƒXƒ^ ON ¤•iƒ}ƒXƒ^.d“üæ = d“üæƒ}ƒXƒ^.d“üæƒR[ƒh " & _
+          "WHERE ¤•iƒR[ƒh = " & Code & "OR JANƒR[ƒh = '" & Code & "'"
     
     Set DbRs = DbCnn.Execute(sql)
 
     If Not DbRs.EOF Then
-        Cells(r.Row, 3).Value = DbRs("ï¿½ï¿½ï¿½bï¿½gï¿½ï¿½")
-        Cells(r.Row, 4).Value = DbRs("ï¿½dï¿½ï¿½ï¿½ï¿½")
-        Cells(r.Row, 5).Value = DbRs("ï¿½dï¿½ï¿½ï¿½æ—ªï¿½ï¿½")
-        Cells(r.Row, 10).Value = DbRs("ï¿½dï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")
-        Cells(r.Row, 2).Value = GetKubun(DbRs("ï¿½æˆµï¿½æ•ª"))
+        Cells(r.Row, 3).Value = DbRs("ƒƒbƒg”")
+        Cells(r.Row, 4).Value = DbRs("d“üæ")
+        Cells(r.Row, 5).Value = DbRs("d“üæ—ªÌ")
+        Cells(r.Row, 10).Value = DbRs("d“üŒ´‰¿")
+        Cells(r.Row, 2).Value = GetKubun(DbRs("æˆµ‹æ•ª"))
         
-        'JANï¿½ó’•ï¿½ï¿½Ìï¿½ï¿½iï¿½Rï¿½[ï¿½hï¿½uï¿½ï¿½ï¿½Aï¿½ï¿½ï¿½Amazonï¿½ï¿½ï¿½p
+        'JANó’•ª‚Ì¤•iƒR[ƒh’uŠ·Aå‚ÉAmazon‰µ—p
         If Len(r.Value) > 6 Then
             r.NumberFormatLocal = "@"
-            r.Value = IIf(Len(DbRs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h")) = 5, "0" & DbRs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h"), DbRs("ï¿½ï¿½ï¿½iï¿½Rï¿½[ï¿½h"))
+            r.Value = IIf(Len(DbRs("¤•iƒR[ƒh")) = 5, "0" & DbRs("¤•iƒR[ƒh"), DbRs("¤•iƒR[ƒh"))
         End If
     
     End If
@@ -54,10 +62,10 @@ Next
 End Sub
 
 Sub FetchExcellForPurchase()
-'ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ìƒfï¿½[ï¿½^ï¿½æ“¾
+'”­’—p¤•iî•ñ‚Ìƒf[ƒ^æ“¾
 
 Dim DataBook As Workbook, DataSheet As Worksheet, PurDataCodeRange As Range, PurDataJanRange As Range
-Set DataSheet = OpenPurDataBook().Worksheets("ï¿½ï¿½ï¿½iï¿½ï¿½ï¿½")
+Set DataSheet = OpenPurDataBook().Worksheets("¤•iî•ñ")
 Set PurDataJanRange = DataSheet.Range(Cells(1, 1), Cells(DataSheet.UsedRange.Rows.Count, 1))
 Set PurDataCodeRange = DataSheet.Range(Cells(1, 2), Cells(DataSheet.UsedRange.Rows.Count, 2))
 
@@ -78,8 +86,8 @@ For Each r In CodeRange
             Err.Clear
             HitRow = WorksheetFunction.Match(Code, PurDataJanRange, 0)
             
-            If Err And IsEmpty(Cells(r.Row, 4).Value) Then 'ï¿½dï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½hï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É‚ï¿½Gï¿½Nï¿½Zï¿½ï¿½ï¿½É‚ï¿½È‚ï¿½ï¿½ï¿½ÎAï¿½ï¿½ï¿½ï¿½ï¿½Å‚ï¿½ï¿½È‚ï¿½ï¿½Ì‚Å’ï¿½ï¿½Óï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-                Cells(r.Row, 2).Value = "ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½ ï¿½fï¿½[ï¿½^ï¿½È‚ï¿½"
+            If Err Or IsEmpty(Cells(r.Row, 4).Value) Then 'd“üæƒR[ƒh‚ª¤°‚É‚àƒGƒNƒZƒ‹‚É‚à‚È‚¯‚ê‚ÎA”­’‚Å‚«‚È‚¢‚Ì‚Å’ˆÓ‘‚«‚ğ“ü‚ê‚é
+                Cells(r.Row, 2).Value = "”­’—p¤•iî•ñ ƒf[ƒ^‚È‚µ"
                 GoTo Continue
             End If
         
@@ -87,16 +95,17 @@ For Each r In CodeRange
     
     On Error GoTo 0
         
-    'ï¿½ï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ÓAï¿½ï¿½ï¿½[ï¿½Jï¿½[ï¿½ï¿½ï¿½bï¿½gï¿½ï¿½
-    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 35).Value 'ï¿½ï¿½zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-    Cells(r.Row, 11).Value = DataSheet.Cells(HitRow, 5).Value 'ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ìƒï¿½ï¿½bï¿½gï¿½ï¿½
+    'è”z’ˆÓAƒ[ƒJ[ƒƒbƒgAd“üæ–¼
+    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 35).Value 'è”z’ˆÓ
+    Cells(r.Row, 11).Value = DataSheet.Cells(HitRow, 5).Value '”­’—p¤•iî•ñ‚Ìƒƒbƒg”
+    Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 4).Value 'd“üæ–¼
     
-    'ï¿½dï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½hï¿½Aï¿½ï¿½ï¿½ï¿½ï¿½Aï¿½dï¿½ï¿½ï¿½æ–¼ï¿½ï¿½6ï¿½Pï¿½^ï¿½É‚È‚ï¿½ï¿½ï¿½ï¿½Ì‚İ“ï¿½ï¿½ï¿½ï¿½
+    'd“üæƒR[ƒhAŒ´‰¿Ad“üæ–¼‚Í6ƒPƒ^‚É‚È‚¢‚Ì‚İ“ü‚ê‚é
     If IsEmpty(Cells(r.Row, 4).Value) Then
     
-        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 32).Value 'ï¿½dï¿½ï¿½ï¿½ï¿½Rï¿½[ï¿½h
-        Cells(r.Row, 5).Value = DataSheet.Cells(HitRow, 4).Value 'ï¿½dï¿½ï¿½ï¿½æ–¼
-        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 13).Value 'ï¿½ï¿½ï¿½ï¿½
+        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 32).Value 'd“üæƒR[ƒh
+        Cells(r.Row, 5).Value = DataSheet.Cells(HitRow, 4).Value 'd“üæ–¼
+        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 13).Value 'Œ´‰¿
 
     End If
 
@@ -107,14 +116,20 @@ Next
 End Sub
 
 Sub FetchExcellJanInventory()
-'ï¿½Iï¿½È‚ï¿½ï¿½İŒÉ•\ï¿½fï¿½[ï¿½^ï¿½ÌŠmï¿½F
+'’I‚È‚µİŒÉ•\ƒf[ƒ^‚ÌŠm”F
 
 
 End Sub
 
 Sub CalcPurchaseQuantity()
-Dim i As Long
-For i = 2 To 60
+
+Dim CodeRange As Range, r As Range
+Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+
+For Each r In CodeRange
+    Dim i As Long
+    i = r.Row
+    
     Dim Rot As Double, Qty As Long, RequestQty As Double
     If IsEmpty(Cells(i, 11).Value) Then
         Rot = 1
@@ -136,13 +151,13 @@ Dim tmp As String
 
 Select Case KubunCode
     Case 3
-        tmp = "ï¿½ï¿½ï¿½ï¿½:ï¿½Ì”ï¿½ï¿½ï¿½ï¿½~"
+        tmp = "¤°:”Ì”„’†~"
     Case 7
-        tmp = "ï¿½ï¿½ï¿½ï¿½:ï¿½İŒÉ”pï¿½ï¿½"
+        tmp = "¤°:İŒÉ”p”Ô"
     Case 8
-        tmp = "ï¿½ï¿½ï¿½ï¿½:ï¿½İŒÉï¿½ï¿½ï¿½"
+        tmp = "¤°:İŒÉˆ•ª"
     Case 9
-        tmp = "ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½[ï¿½Jï¿½[ï¿½pï¿½ï¿½"
+        tmp = "¤°:ƒ[ƒJ[”p”Ô"
     Case Else
         tmp = ""
 End Select
@@ -153,10 +168,10 @@ End Function
 
 Private Function OpenPurDataBook() As Workbook
 
-'ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ìƒtï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½Jï¿½ï¿½ï¿½Ü‚ï¿½ï¿½B
-'ï¿½ï¿½ï¿½sï¿½ï¿½ï¿½ÌƒGï¿½Nï¿½Zï¿½ï¿½ï¿½Å”ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½Ìƒtï¿½@ï¿½Cï¿½ï¿½ï¿½ï¿½Jï¿½ï¿½ï¿½Ä‚ï¿½ï¿½ï¿½ÎAï¿½ï¿½ï¿½Ìƒï¿½ï¿½[ï¿½Nï¿½uï¿½bï¿½Nï¿½ï¿½Ô‚ï¿½ï¿½Ü‚ï¿½ï¿½B
+'”­’—p¤•iî•ñ‚Ìƒtƒ@ƒCƒ‹‚ğŠJ‚«‚Ü‚·B
+'Às’†‚ÌƒGƒNƒZƒ‹‚Å”­’—p¤•iî•ñ‚Ìƒtƒ@ƒCƒ‹‚ğŠJ‚¢‚Ä‚¢‚ê‚ÎA‚»‚Ìƒ[ƒNƒuƒbƒN‚ğ•Ô‚µ‚Ü‚·B
 
-Const PUR_DATA_EXCELL_PATH As String = "\\Server02\ï¿½ï¿½ï¿½iï¿½ï¿½\ï¿½lï¿½bï¿½gï¿½Ì”ï¿½ï¿½Ö˜A\ï¿½ï¿½ï¿½ï¿½ï¿½Ö˜A\ï¿½ï¿½ï¿½ï¿½ï¿½pï¿½ï¿½ï¿½iï¿½ï¿½ï¿½.xlsm"
+Const PUR_DATA_EXCELL_PATH As String = "\\Server02\¤•i•”\ƒlƒbƒg”Ì”„ŠÖ˜A\”­’ŠÖ˜A\”­’—p¤•iî•ñ.xlsm"
 
 Dim WorkBookName As String
 WorkBookName = Dir(PUR_DATA_EXCELL_PATH)
