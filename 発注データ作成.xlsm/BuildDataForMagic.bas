@@ -47,6 +47,15 @@ For i = 2 To Range("A1").End(xlDown).Row
 
 Next
 
+Worksheets("MagicˆêŠ‡“o˜^").Columns("A:E").AutoFit
+Worksheets("Magicè“ü—Í—p").Columns("A:I").AutoFit
+
+'MagicˆêŠ‡“o˜^ƒV[ƒg‚ğV‹KƒuƒbƒN‚ÉƒRƒs[ACSV‚Å•Û‘¶
+Worksheets("MagicˆêŠ‡“o˜^").Copy
+ActiveSheet.Rows(1).Delete
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & "\Magic“o˜^—pCSV" & Format(Date, "MMdd") & ".csv", FileFormat:=xlCSV
+ActiveWorkbook.Close
+
 End Sub
 
 Private Function ReadPurchase(ByVal Row As Long) As Purchase
@@ -126,7 +135,12 @@ Private Sub WriteMagicCsv(ByRef Purchase As Purchase)
     Set TargetSheet = Worksheets("MagicˆêŠ‡“o˜^")
     WriteRow = TargetSheet.UsedRange.Rows.Count + 1
     
-    TargetSheet.Cells(WriteRow, 1).Resize(1, 5).Value = Record
+    With TargetSheet
+        .Cells(WriteRow, 2).NumberFormatLocal = String(9, "0")
+        .Cells(WriteRow, 3).NumberFormatLocal = String(8, "0")
+    
+        .Cells(WriteRow, 1).Resize(1, 5).Value = Record
+    End With
     
 End Sub
 
