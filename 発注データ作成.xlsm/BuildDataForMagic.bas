@@ -1,6 +1,6 @@
 Attribute VB_Name = "BuildDataForMagic"
 Option Explicit
-Const OPERATOR_CODE As Integer = 128
+Const OPERATOR_CODE As Integer = 329
 
 Type Purchase
 
@@ -38,7 +38,7 @@ For i = 2 To Range("A1").End(xlDown).Row
         'Call WriteHoldList(CurrentPurchase)
     
         If CurrentPurchase.Code Like "######" Then
-            Call WriteMagicCsv(CurrentPurchase)
+            Call WriteMagicTxt(CurrentPurchase)
         Else
             Call WriteMagicManualInput(CurrentPurchase)
         End If
@@ -53,7 +53,15 @@ Worksheets("Magic手入力用").Columns("A:I").AutoFit
 'Magic一括登録シートを新規ブックにコピー、CSVで保存
 Worksheets("Magic一括登録").Copy
 ActiveSheet.Rows(1).Delete
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & "\Magic登録用CSV" & Format(Date, "MMdd") & ".csv", FileFormat:=xlCSV
+
+Dim FileName As String
+FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
+
+If Dir(ThisWorkbook.path & FileName) <> "" Then
+    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlText
 ActiveWorkbook.Close
 
 End Sub
@@ -103,22 +111,7 @@ ReadPurchase = TmpPur
 
 End Function
 
-Function GetPickupFlag(ByVal VendorCode As String) As Integer
-
-    On Error Resume Next
-
-    Dim PickupFlag As Integer
-    PickupFlag = WorksheetFunction.VLookup(VendorCode, Worksheets("仕入先別設定").Range(Worksheets("仕入先別設定").Cells(1, 1), Worksheets("仕入先別設定").Range("A1").SpecialCells(xlCellTypeLastCell)), 3, False)
-
-    If PickupFlag = 0 Then
-        PickupFlag = 2
-    End If
-    
-    GetPickupFlag = PickupFlag
-
-End Function
-
-Private Sub WriteMagicCsv(ByRef Purchase As Purchase)
+Private Sub WriteMagicTxt(ByRef Purchase As Purchase)
     
     Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
     
