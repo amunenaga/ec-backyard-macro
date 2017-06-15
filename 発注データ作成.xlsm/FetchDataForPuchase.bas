@@ -4,6 +4,9 @@ Option Explicit
 Sub CreateQuantitySheet()
 
 Call LoadAllPicking
+
+Workbooks("手配数量決定シート").Activate
+
 Call SumPuchaseRequest
 
 '発注に必要な情報をデータベース・Excelファイルから取得
@@ -11,6 +14,8 @@ Call FetchSyokonData
 Call FetchExcellForPurchase
 
 Call CalcPurchaseQuantity
+
+Call FetchPickupFlag
 
 End Sub
 
@@ -36,7 +41,7 @@ For Each r In CodeRange
     Dim sql As String, Code As String
     Code = r.Value
         
-    sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称 " & _
+    sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
           "FROM 商品マスタ JOIN 仕入先マスタ ON 商品マスタ.仕入先 = 仕入先マスタ.仕入先コード " & _
           "WHERE 商品コード = " & Code & "OR JANコード = '" & Code & "'"
     
@@ -47,7 +52,8 @@ For Each r In CodeRange
         Cells(r.Row, 4).Value = DbRs("仕入先")
         Cells(r.Row, 5).Value = DbRs("仕入先略称")
         Cells(r.Row, 10).Value = DbRs("仕入原価")
-        Cells(r.Row, 2).Value = GetKubun(DbRs("取扱区分"))
+        Cells(r.Row, 2).Value = GetKubunLabel(DbRs("取扱区分"))
+        Cells(r.Row, 11).Value = DbRs("発注区分")
         
         'JAN受注分の商品コード置換、主にAmazon卸用
         If Len(r.Value) > 6 Then
@@ -118,10 +124,56 @@ End Sub
 Sub FetchExcellJanInventory()
 '棚なし在庫表データの確認
 
+Const NOLOCATION_INVENTRY_EXCELL As String = "\\server02\商品部\ネット販売関連\棚無在庫確認表.xlsm"
+Const INVENTRY_SHEET As String = "棚無データ"
+
+Workbooks.Open FileName:=NOLOCATION_INVENTRY_EXCELL, ReadOnly:=True
+
+Dim CodeRange As Range, r As Range
+With ThisWorkbook.Worksheets("手配数量決定シート")
+    Set CodeRange = .Range(.Cells(2, 7), .Cells(2, 7).End(xlDown))
+End With
+
+Dim InventryRange As Range
+
+With Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Worksheets(INVENTRY_SHEET)
+    
+    Set InventryRange = .Range(.Cells(1, 2), .Cells(1, 2).End(xlDown))
+
+End With
+
+For Each r In CodeRange
+
+    Dim Code As String, HitRow As Double, Location As String, StockQuantity As Long
+    
+    Code = r.Value
+
+    On Error Resume Next
+    HitRow = WorksheetFunction.Match(Code, InventryRange, 0)
+    
+    If Err = 0 Then
+    
+        StockQuantity = InventryRange.Cells(HitRow, 1).Offset(0, 1).Value
+            
+        If StockQuantity > 1 Then
+            
+            Location = InventryRange.Cells(HitRow, 1).Offset(0, 3).Value
+            r.Offset(0, -5).Value = Location
+        
+        End If
+            
+    End If
+    
+    On Error GoTo 0
+
+Next
+
+Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Close Savechanges:=False
 
 End Sub
 
 Sub CalcPurchaseQuantity()
+'手配依頼数量から、ロット単位・発注単位で丸めた発注数数量を算出し、A列へ入れる。
 
 Dim CodeRange As Range, r As Range
 Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
@@ -146,7 +198,10 @@ Next
 
 End Sub
 
-Private Function GetKubun(ByVal KubunCode As Integer) As String
+Private Function GetKubunLabel(ByVal KubunCode As Integer) As String
+'商品マスタでは区分は1～9の数字なので、表示名で置き換える。
+'名称マスタ内に数字-区分名の組は保存されているが、ここではSwitch文で振り分ける。
+
 Dim tmp As String
 
 Select Case KubunCode
@@ -195,3 +250,40 @@ ret:
 Set OpenPurDataBook = wb
 
 End Function
+
+Sub FetchPickupFlag()
+
+'接続のためのオブジェクトを定義、DB接続設定をセット
+Dim DbCnn As New ADODB.Connection
+Dim DbCmd  As New ADODB.Command
+Dim DbRs As New ADODB.Recordset
+
+DbCnn.ConnectionTimeout = 0
+DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
+DbCmd.CommandTimeout = 180
+Set DbCmd.ActiveConnection = DbCnn
+
+'商品コードのレンジをセット、1セルずつSQL実行
+Dim CodeRange As Range, r As Range
+Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+
+For Each r In CodeRange
+    Dim sql As String, Code As String
+    Code = r.Value
+        
+    sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
+          "FROM 商品マスタ JOIN 仕入先マスタ ON 商品マスタ.仕入先 = 仕入先マスタ.仕入先コード " & _
+          "WHERE 商品コード = " & Code & "OR JANコード = '" & Code & "'"
+    
+    Set DbRs = DbCnn.Execute(sql)
+
+    If Not DbRs.EOF Then
+        Cells(r.Row, 3).Value = DbRs("ロット数")
+        Cells(r.Row, 4).Value = DbRs("仕入先")
+
+    End If
+
+Next
+
+
+End Sub
