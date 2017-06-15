@@ -4,6 +4,8 @@ Option Explicit
 Const PICKING_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\"
 
 Sub LoadAllPicking()
+'手配依頼チェック済のピッキングファイルを一括して読込
+'手配依頼として背景色が変えてある行をコピーします。
 
 Application.ScreenUpdating = False
 Application.DisplayAlerts = False
@@ -33,6 +35,7 @@ Next
 End Sub
 
 Sub LoadSellerPicking(ByVal FileName As String)
+'セラー分のピッキングファイル読み込み
 
 Dim Mall As String, PickingFileName As String
 
@@ -78,11 +81,12 @@ With ThisWorkbook.Worksheets("セラー分")
     Next
 End With
 
-ActiveWorkbook.Close SaveChanges:=False
+ActiveWorkbook.Close Savechanges:=False
 
 
 End Sub
 Sub LoadPoFile(ByVal FileName As String)
+'Amazon卸のピッキングファイル読み込み
 
 'ピッキングシートブックを開く、アクティブなまま使う
 On Error Resume Next
@@ -120,6 +124,6 @@ With ThisWorkbook.Worksheets("卸分")
     Next
 End With
 
-ActiveWorkbook.Close SaveChanges:=False
+ActiveWorkbook.Close Savechanges:=False
 
 End Sub

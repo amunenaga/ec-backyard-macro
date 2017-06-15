@@ -2,6 +2,7 @@ Attribute VB_Name = "SumPurcheseReq"
 Option Explicit
 
 Sub SumPuchaseRequest()
+'商品別に手配依頼数を集計
 
 Worksheets("手配数量決定シート").Activate
 
@@ -35,6 +36,7 @@ Next
 End Sub
 
 Private Function CountMallOrder(ByVal Code As String) As String
+'モール別の件数略号を作る。A2Rはアマゾン2件、楽天1件の手配依頼あり。
 
 Dim Counter(3) As Long, Mall As String, FoundCode As String, Endrow As Long, k As Long, Mark As String
 
@@ -76,7 +78,8 @@ CountMallOrder = Mark
 End Function
 
 Private Function SumRequestQuantity(ByVal Code As String, ByVal IsSeller As Boolean) As Long
-
+    '商品コード別の手配依頼数量を合計する。
+    
     Dim TargetSheet As Worksheet, Endrow As Long, TmpSum As Long
 
     '数量列はどちらもE列なので、対象シートを切り換えるだけでよい。
