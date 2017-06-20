@@ -15,6 +15,8 @@ Type Purchase
     PurchaseQuantity As Long
     RequireQuantity As Long
     
+    RequireMallCount As String
+    
     WarehouseNumber As Integer
     
     IsPickup As Integer
@@ -34,9 +36,12 @@ For i = 2 To Range("A1").End(xlDown).Row
     Dim CurrentPurchase As Purchase
     CurrentPurchase = ReadPurchase(i)
     
-    If Not CurrentPurchase.IsHold Then
-        'Call WriteHoldList(CurrentPurchase)
-    
+    If CurrentPurchase.IsHold Then
+        Call WriteHoldList(CurrentPurchase)
+    Else
+        
+        Call WriteBackupSheet(CurrentPurchase)
+        
         If CurrentPurchase.Code Like "######" Then
             Call WriteMagicTxt(CurrentPurchase)
         Else
@@ -50,7 +55,7 @@ Next
 Worksheets("Magic一括登録").Columns("A:E").AutoFit
 Worksheets("Magic手入力用").Columns("A:I").AutoFit
 
-'Magic一括登録シートを新規ブックにコピー、CSVで保存
+'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
 Worksheets("Magic一括登録").Copy
 ActiveSheet.Rows(1).Delete
 
@@ -61,7 +66,45 @@ If Dir(ThisWorkbook.path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlText
+Application.DisplayAlerts = False
+    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlText
+    ActiveWorkbook.Close
+Application.DisplayAlerts = True
+
+'バックアップ保存
+ThisWorkbook.Worksheets("発注商品リスト").Copy
+
+With ActiveSheet
+    .Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+    .Rows(1).Insert
+    .Range("B1").Value = "ﾊﾞｯｸｱｯﾌﾟ日時 : " & Format(Date, "YYYY/MM/dd") & " " & Format(Time, "hh:mm:ss")
+End With
+
+ActiveWorkbook.SaveAs FileName:="\\Server02\商品部\ネット販売関連\発注関連\半自動発注バックアップ\BU" & Format(Date, "YYYYMMDD") & "-" & Format(Now, "hhmmss") & ".xlsx"
+ActiveWorkbook.Close
+
+'保留を保存
+Worksheets("保留").Copy
+
+FileName = "\保留" & Format(Date, "MMdd") & ".xlsx"
+
+If Dir(ThisWorkbook.path & FileName) <> "" Then
+    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+ActiveWorkbook.Close
+
+'Magic入力用Excelファイルを保存
+Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
+
+FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
+
+If Dir(ThisWorkbook.path & FileName) <> "" Then
+    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 ActiveWorkbook.Close
 
 End Sub
@@ -81,6 +124,8 @@ With TmpPur
     .WarehouseNumber = IIf(Cells(Row, 6).Value = "V", "187", "180")  '倉庫番号
 
     .RequireQuantity = Cells(Row, 9).Value '手配依頼数量
+    
+    .RequireMallCount = Cells(Row, 6).Value 'モール別の依頼件数
 
     '発注保留に該当するかチェックして、フラグを立てる
 
@@ -92,18 +137,14 @@ With TmpPur
         TmpPur.IsHold = True
     End If
     
-    .UnitCost = Cells(Row, 10).Value '原価データの有無
-    If .UnitCost = 0 Then
-        TmpPur.IsHold = True
-        TmpPur.HoldReason = "原価不明"
-    End If
+    .UnitCost = Cells(Row, 10).Value
     
-    If .VendorCode = 0 And .VendorName = "" Then '仕入先が分かっているか
-        TmpPur.IsHold = True
-        TmpPur.HoldReason = "仕入先不明"
+    '引取で手配するか
+    If Trim(Cells(Row, 11).Value) = "" Then
+        .IsPickup = 2
+    Else
+        .IsPickup = Cells(Row, 11).Value
     End If
-    
-    .IsPickup = GetPickupFlag(.VendorCode) '引取で手配するか
         
 End With
 
@@ -161,4 +202,55 @@ Private Sub WriteMagicManualInput(ByRef Purchase As Purchase)
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
     
+End Sub
+
+Private Sub WriteHoldList(ByRef Purchase As Purchase)
+
+    Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
+    
+    With Purchase
+        Record = Array( _
+                    .HoldReason, _
+                    .WarehouseNumber, _
+                    .VendorName, _
+                    .RequireMallCount, _
+                    Format(Date, "Mdd"), _
+                    .Code, _
+                    .RequireQuantity, _
+                    .ProductName _
+                    )
+    End With
+    
+    Set TargetSheet = Worksheets("保留")
+    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    
+    TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
+    TargetSheet.Cells(WriteRow, 1).Resize(1, 8).Value = Record
+    
+End Sub
+
+Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
+
+    Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
+    
+    With Purchase
+        Record = Array( _
+                    .WarehouseNumber, _
+                    .VendorName, _
+                    .RequireMallCount, _
+                    Format(Date, "Mdd"), _
+                    .Code, _
+                    .Code, _
+                    .ProductName, _
+                    .Code, _
+                    .PurchaseQuantity _
+                    )
+    End With
+    
+    Set TargetSheet = Worksheets("発注商品リスト")
+    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    
+    TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
+    TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
+
 End Sub
