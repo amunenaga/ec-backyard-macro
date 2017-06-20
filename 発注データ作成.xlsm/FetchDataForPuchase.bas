@@ -3,9 +3,9 @@ Option Explicit
 
 Sub CreateQuantitySheet()
 
-Call LoadAllPicking
+Call LoadPurchaseReq.LoadAllPicking
 
-Workbooks("手配数量決定シート").Activate
+Worksheets("手配数量決定シート").Activate
 
 Call SumPuchaseRequest
 
@@ -16,6 +16,8 @@ Call FetchExcellForPurchase
 Call CalcPurchaseQuantity
 
 Call FetchPickupFlag
+
+Call FetchExcellJanInventory
 
 End Sub
 
@@ -103,8 +105,8 @@ For Each r In CodeRange
         
     '手配時注意、メーカーロット、仕入先名
     Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 35).Value '手配時注意
-    Cells(r.Row, 11).Value = DataSheet.Cells(HitRow, 5).Value '発注用商品情報のロット数
-    Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 4).Value '仕入先名
+    Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 5).Value '発注用商品情報のロット数
+    Cells(r.Row, 13).Value = DataSheet.Cells(HitRow, 4).Value '仕入先名
     
     '仕入先コード、原価、仕入先名は6ケタにない時のみ入れる
     If IsEmpty(Cells(r.Row, 4).Value) Then
@@ -155,10 +157,10 @@ For Each r In CodeRange
     
         StockQuantity = InventryRange.Cells(HitRow, 1).Offset(0, 1).Value
             
-        If StockQuantity > 1 Then
+        If StockQuantity > 0 Then
             
             Location = InventryRange.Cells(HitRow, 1).Offset(0, 3).Value
-            r.Offset(0, -5).Value = Location
+            r.Offset(0, -5).Value = "棚無:" & StockQuantity & "場所:" & Location
         
         End If
             
@@ -183,15 +185,15 @@ For Each r In CodeRange
     i = r.Row
     
     Dim Rot As Double, Qty As Long, RequestQty As Double
-    If IsEmpty(Cells(i, 11).Value) Then
+    Rot = Cells(i, 12).Value
+    
+    If IsEmpty(Rot) Or Rot = 0 Then
         Rot = 1
-    Else
-        Rot = Cells(i, 11).Value
     End If
     
     RequestQty = Cells(i, 9).Value
     
-    Qty = WorksheetFunction.Ceiling(Rot, RequestQty)
+    Qty = WorksheetFunction.Ceiling(RequestQty, Rot)
 
     Cells(i, 1).Value = Qty
 Next
@@ -217,7 +219,7 @@ Select Case KubunCode
         tmp = ""
 End Select
 
-GetKubun = tmp
+GetKubunLabel = tmp
 
 End Function
 
@@ -263,23 +265,27 @@ DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
 DbCmd.CommandTimeout = 180
 Set DbCmd.ActiveConnection = DbCnn
 
-'商品コードのレンジをセット、1セルずつSQL実行
+'仕入先コードのレンジをセット、1セルずつSQL実行
 Dim CodeRange As Range, r As Range
-Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown)).Offset(0, -3)
 
 For Each r In CodeRange
-    Dim sql As String, Code As String
-    Code = r.Value
+
+    '引取区分が空欄で、仕入先コードが入っていれば商魂から取得
+    If Cells(r.Row, 11).Value = "" And Not Cells(r.Row, 4).Value = "" Then
+    
+    Dim sql As String, VendorCode As String
+    VendorCode = r.Value
         
-    sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
-          "FROM 商品マスタ JOIN 仕入先マスタ ON 商品マスタ.仕入先 = 仕入先マスタ.仕入先コード " & _
-          "WHERE 商品コード = " & Code & "OR JANコード = '" & Code & "'"
+    sql = "SELECT 発注区分 " & _
+          "FROM 仕入先マスタ " & _
+          "WHERE 仕入先コード = " & VendorCode
     
     Set DbRs = DbCnn.Execute(sql)
 
     If Not DbRs.EOF Then
-        Cells(r.Row, 3).Value = DbRs("ロット数")
-        Cells(r.Row, 4).Value = DbRs("仕入先")
+        Cells(r.Row, 11).Value = DbRs("発注区分")
+    End If
 
     End If
 
