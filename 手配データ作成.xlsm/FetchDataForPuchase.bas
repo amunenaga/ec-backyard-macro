@@ -3,10 +3,20 @@ Option Explicit
 
 Sub CreateQuantitySheet()
 
+'セラー分、卸分、手配数量入力シートを用意
+Dim Sh As Variant
+For Each Sh In Array(Worksheets("セラー分"), Worksheets("卸分"), Worksheets("手配数量入力シート"))
+    Call PrepareSheet(Sh)
+Next
+
+'アマゾン・楽天・ヤフーの各棚なしピッキングシート、アマゾン卸の手配依頼読込
 Call LoadPurchaseReq.LoadAllPicking
 
-Worksheets("手配数量決定シート").Activate
+ThisWorkbook.SaveAs FileName:=ThisWorkbook.path & "\" & "手配データ" & Format(Date, "MMdd") & ".xlsm"
 
+Worksheets("手配数量入力シート").Activate
+
+'商品別に手配依頼数量を集計
 Call SumPuchaseRequest
 
 '発注に必要な情報をデータベース・Excelファイルから取得
@@ -17,11 +27,43 @@ Call CalcPurchaseQuantity
 
 Call FetchPickupFlag
 
+'Excelで管理されている棚なし在庫のロケーションを取得
 Call FetchExcellJanInventory
+
+With Worksheets("手配数量入力シート")
+
+    Dim EndRow As Long
+    EndRow = Worksheets("手配数量入力シート").UsedRange.Rows.Count
+
+    If .Buttons.Count > 0 Then
+        .Buttons(1).Delete
+    End If
+
+    With .Buttons.Add( _
+        Range("B" & EndRow).Left - 20, _
+        Range("B" & EndRow).Top + 20, _
+        200, _
+        30 _
+        )
+        
+        .OnAction = "BuildPurcahseData"
+        .Characters.Text = "発注システム用データ出力"
+        .Name = "BuidDataButton"
+        
+    End With
+
+    .Range("A2").Activate
+
+End With
+
+ActiveWindow.ScrollColumn = 1
+ActiveWindow.ScrollRow = 1
+
+MsgBox Prompt:="手配数量入力シート、データ入力完了" & vbLf & "保留チェック、手配数量の修正を行ってください。", Buttons:=vbInformation
 
 End Sub
 
-Sub FetchSyokonData()
+Private Sub FetchSyokonData()
 '商魂商品マスターのデータ取得
 '実際に読みに行くテーブルは、受注詳細確認用に毎朝レプリケーションを作るServer3のEC課用マスタ
 
@@ -58,7 +100,7 @@ For Each r In CodeRange
         Cells(r.Row, 11).Value = DbRs("発注区分")
         
         'JAN受注分の商品コード置換、主にAmazon卸用
-        If Len(r.Value) > 6 Then
+        If Len(Code) > 6 Then
             r.NumberFormatLocal = "@"
             r.Value = IIf(Len(DbRs("商品コード")) = 5, "0" & DbRs("商品コード"), DbRs("商品コード"))
         End If
@@ -69,7 +111,7 @@ Next
 
 End Sub
 
-Sub FetchExcellForPurchase()
+Private Sub FetchExcellForPurchase()
 '発注用商品情報のデータ取得
 
 Dim DataBook As Workbook, DataSheet As Worksheet, PurDataCodeRange As Range, PurDataJanRange As Range
@@ -123,7 +165,7 @@ Next
 
 End Sub
 
-Sub FetchExcellJanInventory()
+Private Sub FetchExcellJanInventory()
 '棚なし在庫表データの確認
 
 Const NOLOCATION_INVENTRY_EXCELL As String = "\\server02\商品部\ネット販売関連\棚無在庫確認表.xlsm"
@@ -132,16 +174,14 @@ Const INVENTRY_SHEET As String = "棚無データ"
 Workbooks.Open FileName:=NOLOCATION_INVENTRY_EXCELL, ReadOnly:=True
 
 Dim CodeRange As Range, r As Range
-With ThisWorkbook.Worksheets("手配数量決定シート")
+With ThisWorkbook.Worksheets("手配数量入力シート")
     Set CodeRange = .Range(.Cells(2, 7), .Cells(2, 7).End(xlDown))
 End With
 
 Dim InventryRange As Range
 
 With Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Worksheets(INVENTRY_SHEET)
-    
     Set InventryRange = .Range(.Cells(1, 2), .Cells(1, 2).End(xlDown))
-
 End With
 
 For Each r In CodeRange
@@ -174,7 +214,7 @@ Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Close Savechanges:=False
 
 End Sub
 
-Sub CalcPurchaseQuantity()
+Private Sub CalcPurchaseQuantity()
 '手配依頼数量から、ロット単位・発注単位で丸めた発注数数量を算出し、A列へ入れる。
 
 Dim CodeRange As Range, r As Range
@@ -200,7 +240,7 @@ Next
 
 End Sub
 
-Private Function GetKubunLabel(ByVal KubunCode As Integer) As String
+Private Function GetKubunLabel(ByVal KubunCode As Variant) As String
 '商品マスタでは区分は1～9の数字なので、表示名で置き換える。
 '名称マスタ内に数字-区分名の組は保存されているが、ここではSwitch文で振り分ける。
 
@@ -253,43 +293,35 @@ Set OpenPurDataBook = wb
 
 End Function
 
-Sub FetchPickupFlag()
+Private Sub FetchPickupFlag()
+'引取の仕入先について、仕入先リストのシートからVlookup関数にて引取の区分番号を取得する。
+'引取以外は発注区分は 2
 
-'接続のためのオブジェクトを定義、DB接続設定をセット
-Dim DbCnn As New ADODB.Connection
-Dim DbCmd  As New ADODB.Command
-Dim DbRs As New ADODB.Recordset
+'仕入先コードのレンジをセット、1セルずつVlookupを行う
+Dim CodeRange As Range, r As Range, VendorsRange As Range
+Set CodeRange = Range(Cells(2, 4), Cells(2, 4).End(xlDown))
 
-DbCnn.ConnectionTimeout = 0
-DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
-DbCmd.CommandTimeout = 180
-Set DbCmd.ActiveConnection = DbCnn
-
-'仕入先コードのレンジをセット、1セルずつSQL実行
-Dim CodeRange As Range, r As Range
-Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown)).Offset(0, -3)
+'仕入先コードでVlookupして探すレンジ
+Set VendorsRange = ThisWorkbook.Worksheets("仕入先リスト").Range("A1").CurrentRegion
 
 For Each r In CodeRange
 
-    '引取区分が空欄で、仕入先コードが入っていれば商魂から取得
-    If Cells(r.Row, 11).Value = "" And Not Cells(r.Row, 4).Value = "" Then
+    Dim VendorCode As String, DeliveryDiv As Integer
     
-    Dim sql As String, VendorCode As String
     VendorCode = r.Value
-        
-    sql = "SELECT 発注区分 " & _
-          "FROM 仕入先マスタ " & _
-          "WHERE 仕入先コード = " & VendorCode
     
-    Set DbRs = DbCnn.Execute(sql)
-
-    If Not DbRs.EOF Then
-        Cells(r.Row, 11).Value = DbRs("発注区分")
-    End If
-
-    End If
-
+    On Error Resume Next
+    
+        DeliveryDiv = WorksheetFunction.VLookup(VendorCode, VendorsRange, 3, False)
+        
+        If Err Or DeliveryDiv = 0 Then
+            DeliveryDiv = 2
+        End If
+        
+    On Error GoTo 0
+    
+    r.Offset(0, 7).Value = DeliveryDiv
+    
 Next
-
 
 End Sub

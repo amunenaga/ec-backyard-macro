@@ -32,9 +32,12 @@ PickingFiles = Array( _
 For Each File In PickingFiles
     Call LoadPoFile(CStr(File))
 Next
+
+Call ApendSpToSeller
+
 End Sub
 
-Sub LoadSellerPicking(ByVal FileName As String)
+Private Sub LoadSellerPicking(ByVal FileName As String)
 'セラー分のピッキングファイル読み込み
 
 Dim Mall As String, PickingFileName As String
@@ -63,7 +66,7 @@ On Error GoTo 0
 '開いているピッキングシートから、手配依頼読込シートへデータコピー
 With ThisWorkbook.Worksheets("セラー分")
     Dim WriteRow As Long, i As Long
-    WriteRow = .Range("A1").SpecialCells(xlCellTypeLastCell).Row + 1
+    WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
     For i = 3 To ActiveSheet.UsedRange.Rows.Count
         
@@ -85,7 +88,7 @@ ActiveWorkbook.Close Savechanges:=False
 
 
 End Sub
-Sub LoadPoFile(ByVal FileName As String)
+Private Sub LoadPoFile(ByVal FileName As String)
 'Amazon卸のピッキングファイル読み込み
 
 'ピッキングシートブックを開く、アクティブなまま使う
@@ -99,7 +102,7 @@ On Error GoTo 0
 '開いているピッキングシートから、手配依頼読込シートへデータコピー
 With ThisWorkbook.Worksheets("卸分")
     Dim WriteRow As Long, i As Long
-    WriteRow = .Range("A1").SpecialCells(xlCellTypeLastCell).Row + 1
+    WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
     For i = 2 To ActiveSheet.UsedRange.Rows.Count
         
@@ -127,3 +130,29 @@ End With
 ActiveWorkbook.Close Savechanges:=False
 
 End Sub
+
+Sub ApendSpToSeller()
+
+With Worksheets("手入力分")
+
+    If IsEmpty(.Range("B2").Value) Then
+        Exit Sub
+    Else
+        Dim CodeRange As Range
+        Set CodeRange = .Range(.Cells(2, 2), .Cells(1, 2).End(xlDown))
+    End If
+    
+End With
+
+Dim r As Range
+
+For Each r In CodeRange
+    With Worksheets("セラー分")
+        .Range("A1").End(xlDown).Offset(1, 0).Value = "SP"
+        .Range("C1").End(xlDown).Offset(1, 0).NumberFormatLocal = "@"
+        .Range("C1").End(xlDown).Offset(1, 0).Resize(1, 3).Value = r.Resize(1, 3).Value
+    End With
+Next
+
+End Sub
+

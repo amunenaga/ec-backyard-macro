@@ -3,6 +3,7 @@ Option Explicit
 Const OPERATOR_CODE As Integer = 329
 
 Type Purchase
+'手配数量入力シート1行分に相当するユーザー定義型
 
     Code As String
     ProductName As String
@@ -27,8 +28,16 @@ Type Purchase
 End Type
 
 Sub BuildPurcahseData()
-    
-Worksheets("手配数量決定シート").Activate
+'発注数量決定シートを元に、ファイルを書き出す
+
+'各シートが空かチェック
+Dim Sh As Variant
+For Each Sh In Array(Worksheets("Magic一括登録"), Worksheets("Magic手入力用"), Worksheets("発注商品リスト"), Worksheets("保留"))
+    Call PrepareSheet(Sh)
+Next
+
+'データ出力用のシートに、1行ずつコピー
+Worksheets("手配数量入力シート").Activate
 
 Dim i As Long
 For i = 2 To Range("A1").End(xlDown).Row
@@ -55,6 +64,8 @@ Next
 Worksheets("Magic一括登録").Columns("A:E").AutoFit
 Worksheets("Magic手入力用").Columns("A:I").AutoFit
 
+'出力用シートをファイルとして保存していく
+
 'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
 Worksheets("Magic一括登録").Copy
 ActiveSheet.Rows(1).Delete
@@ -67,11 +78,10 @@ If Dir(ThisWorkbook.path & FileName) <> "" Then
 End If
 
 Application.DisplayAlerts = False
-    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlText
+    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
     ActiveWorkbook.Close
-Application.DisplayAlerts = True
 
-'バックアップ保存
+'バックアップを保存
 ThisWorkbook.Worksheets("発注商品リスト").Copy
 
 With ActiveSheet
@@ -93,6 +103,10 @@ If Dir(ThisWorkbook.path & FileName) <> "" Then
 End If
 
 ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+
+'c保留へ追記してから閉じる
+Call AppendHoldPurWokbook(ActiveWorkbook)
+
 ActiveWorkbook.Close
 
 'Magic入力用Excelファイルを保存
@@ -107,11 +121,15 @@ End If
 ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 ActiveWorkbook.Close
 
+Application.DisplayAlerts = True
+
+MsgBox Prompt:="ファイル保存が完了しました。", Buttons:=vbInformation
+
 End Sub
 
 Private Function ReadPurchase(ByVal Row As Long) As Purchase
+'手配数量入力シートから1行を1変数に読み込む
 
-'手配数量決定シートから1行を1変数に読み込む
 Dim TmpPur As Purchase
 
 With TmpPur
@@ -252,5 +270,11 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
+
+End Sub
+
+Sub test()
+
+Call AppendHoldPurWokbook(ActiveWorkbook)
 
 End Sub
