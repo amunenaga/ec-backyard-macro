@@ -140,15 +140,12 @@ For Each r In CodeRange
             Err.Clear
             HitRow = WorksheetFunction.Match(Code, PurDataJanRange, 0)
             
-            If Err Or IsEmpty(Cells(r.Row, 4).Value) Then '仕入先コードが商魂にもエクセルにもなければ、発注できないので注意書きを入れる
-                Cells(r.Row, 2).Value = "発注用商品情報 データなし"
-                GoTo Continue
+            If Err And IsEmpty(Cells(r.Row, 4).Value) Then '仕入先コードが商魂にもエクセルにもなければ、発注できないので注意書きを入れる
+                Cells(r.Row, 2).Value = "発注用商品情報 該当JANなし"
             End If
         
         End If
-    
-    On Error GoTo 0
-        
+            
     '手配時注意、メーカーロット、仕入先名
     Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 35).Value '手配時注意
     Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 5).Value '発注用商品情報のロット数
@@ -163,7 +160,7 @@ For Each r In CodeRange
 
     End If
 
-Continue:
+    On Error GoTo 0
 
 Next
 
@@ -234,25 +231,24 @@ For Each r In CodeRange
     If IsEmpty(Rot) Or Rot = 0 Then
         Rot = 1
     End If
-        
+    
     RequestQty = Cells(i, 9).Value
     
-    '手配依頼数をロット数の倍数で丸める
+    'セイリング関数にてロット数の倍数で手配依頼数を丸める
     Qty = WorksheetFunction.Ceiling(RequestQty, Rot)
 
     Cells(i, 1).Value = Qty
-    
-    'ロット1以外は、手配数量を倍数で変更しているため強調表示
+
+    'ロットが1でない場合は、手配数量が修正されるため強調表示
     If Rot <> 1 Then
     
-        With Union(Cells(i, 1), Cells(i, 9)).Interior
+        With Cells(i, 1).Interior
             .ThemeColor = xlThemeColorAccent2
             .TintAndShade = 0.599993896298105
             .PatternTintAndShade = 0
         End With
     
     End If
-
     
 Next
 
