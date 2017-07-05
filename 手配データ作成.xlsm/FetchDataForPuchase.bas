@@ -112,10 +112,14 @@ Next
 End Sub
 
 Private Sub FetchExcellForPurchase()
-'発注用商品情報のデータ取得
+'発注用商品情報ブックより仕入先・ロット・手配時備考の取得
 
 Dim DataBook As Workbook, DataSheet As Worksheet, PurDataCodeRange As Range, PurDataJanRange As Range
-Set DataSheet = OpenPurDataBook().Worksheets("商品情報")
+
+Set DataSheet = FetchWorkBook("\\Server02\商品部\ネット販売関連\発注関連\発注用商品情報.xlsm").Worksheets("商品情報")
+
+DataSheet.Activate
+
 Set PurDataJanRange = DataSheet.Range(Cells(1, 1), Cells(DataSheet.UsedRange.Rows.Count, 1))
 Set PurDataCodeRange = DataSheet.Range(Cells(1, 2), Cells(DataSheet.UsedRange.Rows.Count, 2))
 
@@ -173,14 +177,14 @@ Const INVENTRY_SHEET As String = "棚無データ"
 
 Workbooks.Open FileName:=NOLOCATION_INVENTRY_EXCELL, ReadOnly:=True
 
-Dim CodeRange As Range, r As Range
+
 With ThisWorkbook.Worksheets("手配数量入力シート")
+    Dim CodeRange As Range, r As Range
     Set CodeRange = .Range(.Cells(2, 7), .Cells(2, 7).End(xlDown))
 End With
 
-Dim InventryRange As Range
-
 With Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Worksheets(INVENTRY_SHEET)
+    Dim InventryRange As Range
     Set InventryRange = .Range(.Cells(1, 2), .Cells(1, 2).End(xlDown))
 End With
 
@@ -210,7 +214,7 @@ For Each r In CodeRange
 
 Next
 
-Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Close Savechanges:=False
+Workbooks(Dir(NOLOCATION_INVENTRY_EXCELL)).Close SaveChanges:=False
 
 End Sub
 
@@ -230,19 +234,33 @@ For Each r In CodeRange
     If IsEmpty(Rot) Or Rot = 0 Then
         Rot = 1
     End If
-    
+        
     RequestQty = Cells(i, 9).Value
     
+    '手配依頼数をロット数の倍数で丸める
     Qty = WorksheetFunction.Ceiling(RequestQty, Rot)
 
     Cells(i, 1).Value = Qty
+    
+    'ロット1以外は、手配数量を倍数で変更しているため強調表示
+    If Rot <> 1 Then
+    
+        With Union(Cells(i, 1), Cells(i, 9)).Interior
+            .ThemeColor = xlThemeColorAccent2
+            .TintAndShade = 0.599993896298105
+            .PatternTintAndShade = 0
+        End With
+    
+    End If
+
+    
 Next
 
 End Sub
 
 Private Function GetKubunLabel(ByVal KubunCode As Variant) As String
 '商品マスタでは区分は1～9の数字なので、表示名で置き換える。
-'名称マスタ内に数字-区分名の組は保存されているが、ここではSwitch文で振り分ける。
+'数字-区分名の組は名称マスタに格納されている。
 
 Dim tmp As String
 
@@ -263,43 +281,13 @@ GetKubunLabel = tmp
 
 End Function
 
-Private Function OpenPurDataBook() As Workbook
-
-'発注用商品情報のファイルを開きます。
-'実行中のエクセルで発注用商品情報のファイルを開いていれば、そのワークブックを返します。
-
-Const PUR_DATA_EXCELL_PATH As String = "\\Server02\商品部\ネット販売関連\発注関連\発注用商品情報.xlsm"
-
-Dim WorkBookName As String
-WorkBookName = Dir(PUR_DATA_EXCELL_PATH)
-
-Dim wb As Workbook
-
-For Each wb In Workbooks
-    
-    If wb.Name = WorkBookName Then
-        wb.Activate
-        GoTo ret
-    
-    End If
-
-Next
-
-Set wb = Workbooks.Open(PUR_DATA_EXCELL_PATH)
-
-ret:
-
-Set OpenPurDataBook = wb
-
-End Function
-
 Private Sub FetchPickupFlag()
 '引取の仕入先について、仕入先リストのシートからVlookup関数にて引取の区分番号を取得する。
 '引取以外は発注区分は 2
 
 '仕入先コードのレンジをセット、1セルずつVlookupを行う
 Dim CodeRange As Range, r As Range, VendorsRange As Range
-Set CodeRange = Range(Cells(2, 4), Cells(2, 4).End(xlDown))
+Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown)).Offset(0, -3)
 
 '仕入先コードでVlookupして探すレンジ
 Set VendorsRange = ThisWorkbook.Worksheets("仕入先リスト").Range("A1").CurrentRegion
@@ -320,8 +308,9 @@ For Each r In CodeRange
         
     On Error GoTo 0
     
-    r.Offset(0, 7).Value = DeliveryDiv
+    Cells(r.Row, 11).Value = DeliveryDiv
     
 Next
 
 End Sub
+

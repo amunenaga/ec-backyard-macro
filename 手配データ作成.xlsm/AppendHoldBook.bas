@@ -106,30 +106,3 @@ With HoldWorkSheet
 End With
 
 End Sub
-
-Function FetchWorkBook(path As String) As Workbook
-
-'発注用商品情報のファイルを開きます。
-'実行中のエクセルで発注用商品情報のファイルを開いていれば、そのワークブックを返します。
-
-Dim WorkBookName As String
-WorkBookName = Dir(path)
-
-Dim wb As Workbook
-
-For Each wb In Workbooks
-    
-    If wb.Name = WorkBookName Then
-        
-        GoTo ret
-    
-    End If
-
-Next
-
-Set wb = Workbooks.Open(path)
-
-ret:
-Set FetchWorkBook = wb
-
-End Function

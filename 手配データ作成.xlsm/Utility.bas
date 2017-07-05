@@ -9,6 +9,29 @@ End If
 
 End Sub
 
-Sub ClosePurDataBook()
+Function FetchWorkBook(path As String) As Workbook
 
-End Sub
+'引数で渡されたパスのブックを開きます。引数のブックを開いていれば、そのブックを戻り値にします。
+
+Dim WorkBookName As String
+WorkBookName = Dir(path)
+
+Dim wb As Workbook
+
+For Each wb In Workbooks
+    
+    If wb.Name = WorkBookName Then
+        
+        GoTo ret
+    
+    End If
+
+Next
+
+Set wb = Workbooks.Open(path)
+
+ret:
+Set FetchWorkBook = wb
+
+End Function
+

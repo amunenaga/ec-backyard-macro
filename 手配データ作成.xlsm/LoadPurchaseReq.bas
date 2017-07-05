@@ -33,7 +33,7 @@ For Each File In PickingFiles
     Call LoadPoFile(CStr(File))
 Next
 
-Call ApendSpToSeller
+Call ApendSpToPurchseReq
 
 End Sub
 
@@ -84,7 +84,7 @@ With ThisWorkbook.Worksheets("セラー分")
     Next
 End With
 
-ActiveWorkbook.Close Savechanges:=False
+ActiveWorkbook.Close SaveChanges:=False
 
 
 End Sub
@@ -127,11 +127,11 @@ With ThisWorkbook.Worksheets("卸分")
     Next
 End With
 
-ActiveWorkbook.Close Savechanges:=False
+ActiveWorkbook.Close SaveChanges:=False
 
 End Sub
 
-Sub ApendSpToSeller()
+Sub ApendSpToPurchseReq()
 
 With Worksheets("手入力分")
 
@@ -144,14 +144,29 @@ With Worksheets("手入力分")
     
 End With
 
-Dim r As Range
+Dim r As Range, MallTicker As String
 
 For Each r In CodeRange
-    With Worksheets("セラー分")
-        .Range("A1").End(xlDown).Offset(1, 0).Value = "SP"
-        .Range("C1").End(xlDown).Offset(1, 0).NumberFormatLocal = "@"
-        .Range("C1").End(xlDown).Offset(1, 0).Resize(1, 3).Value = r.Resize(1, 3).Value
-    End With
+    MallTicker = r.Offset(0, -1).Value
+    
+    If MallTicker Like "*[V|v]*" Then
+    
+        With Worksheets("卸分")
+            .Range("A1").End(xlDown).Offset(1, 0).Value = "V"
+            .Range("C1").End(xlDown).Offset(1, 0).NumberFormatLocal = "@"
+            .Range("C1").End(xlDown).Offset(1, 0).Resize(1, 3).Value = r.Resize(1, 3).Value
+        End With
+        
+    Else
+    
+        With Worksheets("セラー分")
+            .Range("A1").End(xlDown).Offset(1, 0).Value = "SP"
+            .Range("C1").End(xlDown).Offset(1, 0).NumberFormatLocal = "@"
+            .Range("C1").End(xlDown).Offset(1, 0).Resize(1, 3).Value = r.Resize(1, 3).Value
+        End With
+    
+    End If
+
 Next
 
 End Sub
