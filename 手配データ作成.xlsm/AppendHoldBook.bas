@@ -52,7 +52,10 @@ With HoldLogWorkbook.Worksheets("保留一覧")
     Call DeleteEmptyRow(HoldLogWorkbook.Worksheets("保留一覧"))
     
     '最終行の日付チェック、保留一覧シートでは文字列で保持しているため、文字列同士で比較する
-    If CStr(.Range("G1").End(xlDown).Value) = Format(Date, "Mdd") Then Exit Sub
+    If CStr(.Range("G1").End(xlDown).Value) = Format(Date, "Mdd") Then
+        HoldLogWorkbook.Close
+        Exit Sub
+    End If
     
     'コピー実行
     Dim DestinationRange As Range

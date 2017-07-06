@@ -10,8 +10,10 @@ Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 
 RefaxSheet.Activate
 
-If Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value = Format(Date, "Mdd") Then Exit Sub
-
+If Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value = Format(Date, "Mdd") Then
+    RefaxBook.Close
+    Exit Sub
+End If
 '返信FAXの最終の空白行へ書き込む
 Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
 
