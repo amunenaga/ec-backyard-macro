@@ -242,7 +242,7 @@ For Each r In CodeRange
     'ロットが1でない場合は、手配数量が修正されるため強調表示
     If Rot <> 1 Then
     
-        With Cells(i, 1).Interior
+        With Union(Cells(i, 1), Cells(i, 9)).Interior
             .ThemeColor = xlThemeColorAccent2
             .TintAndShade = 0.599993896298105
             .PatternTintAndShade = 0
