@@ -185,7 +185,7 @@ Private Sub WriteMagicTxt(ByRef Purchase As Purchase)
     End With
     
     Set TargetSheet = Worksheets("Magic一括登録")
-    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
     
     With TargetSheet
         .Cells(WriteRow, 2).NumberFormatLocal = String(9, "0")
@@ -215,7 +215,7 @@ Private Sub WriteMagicManualInput(ByRef Purchase As Purchase)
     End With
     
     Set TargetSheet = Worksheets("Magic手入力用")
-    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
     
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record
@@ -240,7 +240,7 @@ Private Sub WriteHoldList(ByRef Purchase As Purchase)
     End With
     
     Set TargetSheet = Worksheets("保留")
-    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
     
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 8).Value = Record
@@ -266,7 +266,7 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     End With
     
     Set TargetSheet = Worksheets("発注商品リスト")
-    WriteRow = TargetSheet.UsedRange.Rows.Count + 1
+    WriteRow = TargetSheet.Range("A1").SpecialCells(xlLastCell).Row + 1
     
     TargetSheet.Cells(WriteRow, 4).NumberFormatLocal = "@"
     TargetSheet.Cells(WriteRow, 1).Resize(1, 9).Value = Record

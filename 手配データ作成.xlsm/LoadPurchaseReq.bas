@@ -68,7 +68,7 @@ With ThisWorkbook.Worksheets("ÉZÉâÅ[ï™")
     Dim WriteRow As Long, i As Long
     WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-    For i = 3 To ActiveSheet.UsedRange.Rows.Count
+    For i = 3 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
         
         If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
             
@@ -104,7 +104,7 @@ With ThisWorkbook.Worksheets("âµï™")
     Dim WriteRow As Long, i As Long
     WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-    For i = 2 To ActiveSheet.UsedRange.Rows.Count
+    For i = 2 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
         
         If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
             
