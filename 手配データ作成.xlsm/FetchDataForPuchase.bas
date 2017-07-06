@@ -134,6 +134,10 @@ For Each r In CodeRange
     Code = r.Value
 
     On Error Resume Next
+        
+        'エラー時に前回格納した値のままになるので明示的に初期化
+        HitRow = 0
+        
         HitRow = WorksheetFunction.Match(Code, PurDataCodeRange, 0)
 
         If Err Then
@@ -174,7 +178,6 @@ Const INVENTRY_SHEET As String = "棚無データ"
 
 Workbooks.Open FileName:=NOLOCATION_INVENTRY_EXCELL, ReadOnly:=True
 
-
 With ThisWorkbook.Worksheets("手配数量入力シート")
     Dim CodeRange As Range, r As Range
     Set CodeRange = .Range(.Cells(2, 7), .Cells(2, 7).End(xlDown))
@@ -192,6 +195,10 @@ For Each r In CodeRange
     Code = r.Value
 
     On Error Resume Next
+    
+    'エラー時に前回格納した値のままになるので明示的に初期化
+    HitRow = 0
+    
     HitRow = WorksheetFunction.Match(Code, InventryRange, 0)
     
     If Err = 0 Then
