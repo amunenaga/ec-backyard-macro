@@ -8,8 +8,11 @@ Dim RefaxBook As Workbook, RefaxSheet As Worksheet, WriteCell As Range
 Set RefaxBook = FetchWorkBook("\\Server02\商品部\ネット販売関連\発注関連\半自動発注バックアップ\FAX納期回答リスト.xlsm")
 Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 
-'返信FAXの最終の空白行へ書き込む
 RefaxSheet.Activate
+
+If Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value = Format(Date, "Mdd") Then Exit Sub
+
+'返信FAXの最終の空白行へ書き込む
 Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
 
 '発注商品リストからデータをコピー

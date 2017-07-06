@@ -40,7 +40,6 @@ HoldXlsxPath = "\\Server02\商品部\ネット販売関連\発注関連\c注文保留分.xlsx"
 Dim HoldLogWorkbook As Workbook
 Set HoldLogWorkbook = FetchWorkBook(HoldXlsxPath)
 
-
 '保留一覧へコピー
 With HoldLogWorkbook.Worksheets("保留一覧")
 
@@ -51,6 +50,9 @@ With HoldLogWorkbook.Worksheets("保留一覧")
     
     '空行削除、保留後に手配した際に保留リストからデータ移動させるため、空行があるかも
     Call DeleteEmptyRow(HoldLogWorkbook.Worksheets("保留一覧"))
+    
+    '最終行の日付チェック、保留一覧シートでは文字列で保持しているため、文字列同士で比較する
+    If CStr(.Range("G1").End(xlDown).Value) = Format(Date, "Mdd") Then Exit Sub
     
     'コピー実行
     Dim DestinationRange As Range
