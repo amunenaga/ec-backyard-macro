@@ -21,7 +21,7 @@ Sub CheckNonArrival()
 'WEB商魂から、注残がないか調べて未入荷が有れば備考列へ追記
 
 '取得できなくても処理はとにかく続行
-On Error Resume Next
+'On Error Resume Next
 
 Dim CodeRange As Range, r As Range
 Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
@@ -53,31 +53,36 @@ Private Function FetchRecentPurchase(ByVal Code As String) As PurchaseLog
     Dim CurrentCode As PurchaseLog
     CurrentCode.Code = Code
 
-    Dim SyokonPage As New InternetExplorerMedium
-    SyokonPage.Visible = False
-  
-    SyokonPage.Navigate "http://server02/gyomu/SK_IZoom.asp?ICode=" & Code & "&C5="
-    Call untilReady(SyokonPage)
-  
-    'オブジェクト変数はDOM
-    Dim DivPurchaseLog As Object
-    Set DivPurchaseLog = SyokonPage.Document.getElementsByName("t1") '最近の発注状況と入荷案内 DivタグのIDがt1
-    Dim RecentRow As Object
-    Set RecentRow = DivPurchaseLog(0).all.Item(13) '最近の発注状況と入荷案内テーブル2行目のDOM
-        
-    With CurrentCode
-        .PurchaseDate = CDate(RecentRow.all.Item(0).innertext)
-        .WarehouseNum = RecentRow.all.Item(1).innertext
-        .PurchaseQuantity = RecentRow.all.Item(2).innertext
-        .NonArrivalQty = IIf(RecentRow.all.Item(3).innertext = "無し", 0, RecentRow.all.Item(3).innertext)
-        .Po = RecentRow.all.Item(4).innertext
-        If Not RecentRow.all.Item(5).innertext Like "*-*" Then
-            .LastArrival = CDate(RecentRow.all.Item(5).innertext)
-        End If
-    End With
+    On Error Resume Next
+            
+        Dim SyokonPage As InternetExplorerMedium
+        Set SyokonPage = New InternetExplorerMedium
     
-    SyokonPage.Quit
+        SyokonPage.Navigate "http://server02/gyomu/SK_IZoom.asp?ICode=" & Code & "&C5="
+        Call untilReady(SyokonPage)
+        
+        'オブジェクト変数はDOM
+        Dim DivPurchaseLog As Object
+        Set DivPurchaseLog = SyokonPage.Document.getElementsByName("t1") '最近の発注状況と入荷案内 DivタグのIDがt1
+        Dim RecentRow As Object
+    
+        Set RecentRow = DivPurchaseLog(0).all.Item(13) '最近の発注状況と入荷案内テーブル2行目のDOM
+        
+        With CurrentCode
+            .PurchaseDate = CDate(RecentRow.all.Item(0).innertext)
+            .WarehouseNum = RecentRow.all.Item(1).innertext
+            .PurchaseQuantity = RecentRow.all.Item(2).innertext
+            .NonArrivalQty = IIf(RecentRow.all.Item(3).innertext = "無し", 0, RecentRow.all.Item(3).innertext)
+            .Po = RecentRow.all.Item(4).innertext
+            If Not RecentRow.all.Item(5).innertext Like "*-*" Then
+                .LastArrival = CDate(RecentRow.all.Item(5).innertext)
+            End If
+        End With
+        
+        SyokonPage.Quit
 
+    On Error GoTo 0
+    
     FetchRecentPurchase = CurrentCode
 
 End Function
@@ -97,7 +102,7 @@ Private Sub untilReady(objIE As Object, Optional ByVal WaitTime As Integer = 20)
     
     'ローディング画面の表示後に、詳細データが動的に再描画されるので1秒待機
     Dim WaitEnd As Date
-    WaitEnd = DateAdd("S", 1, Now())
+    WaitEnd = DateAdd("S", 2, Now())
     Do While Now() < WaitEnd
         DoEvents
     Loop
