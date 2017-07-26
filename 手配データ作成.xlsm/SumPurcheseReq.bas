@@ -27,11 +27,13 @@ Vendor:
 '卸分の手配依頼数量の合計を算出
 '卸分の商品コードを入れる
 If Worksheets("卸分").Range("A2").Value = "" Then GoTo Quit
-Worksheets("卸分").Range("C2:D" & Worksheets("卸分").UsedRange.Rows.Count).AdvancedFilter xlFilterCopy, Unique:=True, CopyToRange:=Range("G2").End(xlDown).Offset(1, 0)
+Worksheets("卸分").Range("C2:D" & Worksheets("卸分").UsedRange.Rows.Count).Copy Destination:=Range("G2").End(xlDown).Offset(1, 0)
+
+'コピーして重複削除
+Range(Cells(2, 6).End(xlDown).Offset(1, 1), Cells(2, 7).End(xlDown).Offset(0, 1)).RemoveDuplicates 1, xlNo
 
 Dim WholeSaleJanRange As Range
 Set WholeSaleJanRange = Range(Cells(2, 6).End(xlDown).Offset(1, 1), Cells(2, 7).End(xlDown))
-
 WholeSaleJanRange.Offset(0, -1).Value = "V"
 
 For Each r In WholeSaleJanRange

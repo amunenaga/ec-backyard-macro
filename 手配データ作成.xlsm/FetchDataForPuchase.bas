@@ -5,7 +5,6 @@ Sub CreateQuantitySheet()
 'ピッキングシートから手配依頼分を読み込んで、商品別に集計、仕入先データなどを商魂から読込
 '「手配数入力シート作成」ボタンで呼び出される
 
-
 'セラー分、卸分、手配数量入力シートを用意
 Dim Sh As Variant
 For Each Sh In Array(Worksheets("セラー分"), Worksheets("卸分"), Worksheets("手配数量入力シート"))
@@ -25,6 +24,8 @@ Call SumPuchaseRequest
 '発注に必要な情報をデータベース・Excelファイルから取得
 Call FetchSyokonData
 Call FetchExcellForPurchase
+
+Call CheckNonArrival
 
 Call CalcPurchaseQuantity
 
