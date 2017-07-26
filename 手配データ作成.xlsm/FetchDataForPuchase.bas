@@ -5,6 +5,9 @@ Sub CreateQuantitySheet()
 'ピッキングシートから手配依頼分を読み込んで、商品別に集計、仕入先データなどを商魂から読込
 '「手配数入力シート作成」ボタンで呼び出される
 
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+
 'セラー分、卸分、手配数量入力シートを用意
 Dim Sh As Variant
 For Each Sh In Array(Worksheets("セラー分"), Worksheets("卸分"), Worksheets("手配数量入力シート"))
@@ -25,8 +28,6 @@ Call SumPuchaseRequest
 Call FetchSyokonData
 Call FetchExcellForPurchase
 
-Call CheckNonArrival
-
 Call CalcPurchaseQuantity
 
 Call FetchPickupFlag
@@ -34,15 +35,17 @@ Call FetchPickupFlag
 'Excelで管理されている棚なし在庫のロケーションを取得
 Call FetchExcellJanInventory
 
+Application.ScreenUpdating = True
+
+Worksheets("手配数量入力シート").Activate
+
+Call CheckNonArrival
+
 'データ出力のボタンを配置
 With Worksheets("手配数量入力シート")
 
     Dim EndRow As Long
     EndRow = Worksheets("手配数量入力シート").UsedRange.Rows.Count
-
-    If .Buttons.Count > 0 Then
-        .Buttons(1).Delete
-    End If
 
     With .Buttons.Add( _
         Range("B" & EndRow).Left - 20, _
@@ -236,14 +239,14 @@ For Each r In CodeRange
     Dim i As Long
     i = r.Row
     
-    Dim Rot As Double, Qty As Long, RequestQty As Double
-    Rot = Cells(i, 12).Value
+    Dim Rot As Double, Qty As Double, RequestQty As Double
+    Rot = CDbl(Cells(i, 12).Value)
     
     If IsEmpty(Rot) Or Rot = 0 Then
         Rot = 1
     End If
     
-    RequestQty = Cells(i, 9).Value
+    RequestQty = CDbl(Cells(i, 9).Value)
     
     'セイリング関数にてロット数の倍数で手配依頼数を丸める
     Qty = WorksheetFunction.Ceiling(RequestQty, Rot)
