@@ -24,7 +24,7 @@ Sub CheckNonArrival()
 'On Error Resume Next
 
 Dim CodeRange As Range, r As Range
-Set CodeRange = Range(Cells(2, 7), Cells(2, 7).End(xlDown))
+Set CodeRange = Worksheets("手配数量入力シート").Range(Cells(2, 7), Cells(2, 7).End(xlDown))
 
 For Each r In CodeRange
     
@@ -38,7 +38,12 @@ For Each r In CodeRange
     LastPur = FetchRecentPurchase(Code)
     
     If LastPur.NonArrivalQty > 0 Then
-        Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & IIf(Cells(r.Row, 2).Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
+        
+        Dim CautionCell As Range
+        Set CautionCell = r.Offset(0, -5)
+        
+        CautionCell.Value = CautionCell.Value & IIf(CautionCell.Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
+    
     End If
 
 Continue:
