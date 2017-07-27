@@ -105,7 +105,7 @@ Private Sub untilReady(objIE As Object, Optional ByVal WaitTime As Integer = 20)
         End If
     Loop
     
-    'ローディング画面の表示後に、詳細データが動的に再描画されるので1秒待機
+    'ローディング画面の表示後に、詳細データが動的に再描画されるので2秒待機
     Dim WaitEnd As Date
     WaitEnd = DateAdd("S", 2, Now())
     Do While Now() < WaitEnd
