@@ -37,7 +37,7 @@ For Each r In CodeRange
     LastPur = InitPur
     LastPur = FetchRecentPurchase(Code)
     
-    If LastPur.NonArrivalQty > 0 Then
+    If LastPur.NonArrivalQty > 1 Then
         
         Dim CautionCell As Range
         Set CautionCell = r.Offset(0, -5)
