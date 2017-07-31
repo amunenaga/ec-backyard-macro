@@ -67,9 +67,9 @@ End With
 ActiveWindow.ScrollColumn = 1
 ActiveWindow.ScrollRow = 1
 
-MsgBox Prompt:="手配数量入力シート、データ入力完了" & vbLf & "保留チェック、手配数量の修正を行ってください。", Buttons:=vbInformation
+ThisWorkbook.Save
 
-MsgBox Prompt:="仕入先別・商品コード順でソートして下さい"
+MsgBox Prompt:="手配数量入力シート、データ入力完了" & vbLf & "保留チェック、手配数量の修正を行ってください。", Buttons:=vbInformation
 
 End Sub
 
