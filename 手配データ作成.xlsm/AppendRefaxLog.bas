@@ -22,7 +22,13 @@ Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
 Dim DataCol As Range
 ThisWorkbook.Worksheets("発注商品リスト").Activate
 Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
-Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+
+If Range("A2").Value = "" Then
+    RefaxBook.Close SaveChanges:=True
+    Exit Sub
+Else
+    Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+End If
 
 'DataColレンジとWriteCellを右へオフセットしながらデータをコピーしていく。
 

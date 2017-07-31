@@ -110,7 +110,7 @@ Call AppendHoldPurWokbook(ActiveWorkbook)
 ActiveWorkbook.Close
 
 '返信FAXリストへ追記
-Call AppendRefaxList
+'Call AppendRefaxList
 
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
@@ -240,18 +240,16 @@ Private Sub WriteHoldList(ByRef Purchase As Purchase)
                     .WarehouseNumber, _
                     .VendorName, _
                     .RequireMallCount, _
-                    Format(Date, "Mdd"), _
+                    Date, _
                     .Code, _
                     .RequireQuantity, _
-                    .ProductName _
-                    )
+                    .ProductName)
     End With
     
     With Worksheets("保留")
         WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-        .Cells(WriteRow, 4).NumberFormatLocal = "@"
-        
+        .Cells(WriteRow, 5).NumberFormatLocal = "Mdd"
         .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
     End With
     
@@ -266,7 +264,7 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
                     .WarehouseNumber, _
                     .VendorName, _
                     .RequireMallCount, _
-                    Format(Date, "Mdd"), _
+                    Date, _
                     .Code, _
                     .Code, _
                     .ProductName, _
@@ -278,7 +276,7 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     With Worksheets("発注商品リスト")
         WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
     
-        .Cells(WriteRow, 4).NumberFormatLocal = "@"
+        .Cells(WriteRow, 4).NumberFormatLocal = "Mdd"
         
         .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
     End With
