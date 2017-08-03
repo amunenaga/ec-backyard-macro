@@ -11,7 +11,7 @@ Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 
 RefaxSheet.Activate
 
-If Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value = Format(Date, "Mdd") Then
+If DateDiff("d", Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value, Date) < 0 Then
     RefaxBook.Close
     Exit Sub
 End If
@@ -32,13 +32,13 @@ End If
 
 'DataColレンジとWriteCellを右へオフセットしながらデータをコピーしていく。
 
-DataCol.Offset(0, 8).Copy Destination:=WriteCell '発注数量
+DataCol.Offset(0, 6).Copy Destination:=WriteCell '発注数量
 DataCol.Offset(0, 0).Copy Destination:=WriteCell.Offset(0, 1) '注番
 DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 3) '仕入先
 DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 4) 'モール識別記号
 DataCol.Offset(0, 3).Copy Destination:=WriteCell.Offset(0, 5) '日付
-DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 8) '手配時商品コード
-DataCol.Offset(0, 6).Copy Destination:=WriteCell.Offset(0, 10) '商品名
+DataCol.Offset(0, 4).Copy Destination:=WriteCell.Offset(0, 8) '商品コード
+DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 10) '商品名
 
 
 '同様に保留シートからデータをコピー
@@ -69,6 +69,12 @@ DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 10) '商品名
 
 DataCol.Offset(0, 0).Copy
 WriteCell.Offset(0, 22).PasteSpecial Paste:=xlPasteValues   '保留理由
+
+On Error Resume Next
+    Application.Run RefaxBook.Name & "!一ヶ月以前転記"
+    Application.Run RefaxBook.Name & "!入荷日の算出式を入力"
+    Application.Run RefaxBook.Name & "!条件付き書式範囲修正"
+On Error GoTo 0
 
 RefaxBook.Close SaveChanges:=True
 
