@@ -130,7 +130,7 @@ End Sub
 
 Private Sub ApendSpToPurchseReq()
 '手入力分を卸分シート、セラー分シートへ振り分けてコピー
-'180番、187番で商品別に数量を合算するた
+'180番、187番で商品別に数量を合算するため
 
 With Worksheets("手入力分")
 
@@ -171,7 +171,7 @@ Next
 End Sub
 
 Private Sub VerifySyokonRegist()
-'DBに接続して最終行から上へ調べていく
+
 
 '接続のためのオブジェクトを定義、DB接続設定をセット
 Dim DbCnn As New ADODB.Connection
@@ -183,6 +183,7 @@ DbCnn.Open "PROVIDER=SQLOLEDB;Server=Server02;Database=ITOSQL_REP;UID=sa;PWD=;"
 DbCmd.CommandTimeout = 180
 Set DbCmd.ActiveConnection = DbCnn
 
+'セラー分は手入力だけJANだけど登録有りがないかを調べればよいので、最終行から上へ調べていく
 With PurchaseReqSeller
     Dim EndRow As Long
     EndRow = PurchaseReqSeller.Range("A1").End(xlDown).Row
@@ -190,7 +191,7 @@ With PurchaseReqSeller
     Dim i As Long
     For i = EndRow To 2 Step -1
         
-        If .Cells(i, 1).Value <> "SP" Then Exit Sub
+        If .Cells(i, 1).Value <> "SP" Then Exit For
         
         Dim Code As String
         Code = .Cells(i, 3).Value
@@ -205,10 +206,37 @@ With PurchaseReqSeller
         Set DbRs = DbCnn.Execute(Sql)
     
         If Not DbRs.EOF Then
-            .Cells(i, 3).Value = CStr(DbRs("商品コード"))
+            .Cells(i, 3).NumberFormatLocal = "@"
+            .Cells(i, 3).Value = IIf(Len(DbRs("商品コード")) = 5, "0" & CStr(DbRs("商品コード")), CStr(DbRs("商品コード")))
         End If
     
 Continue:
+    Next
+
+End With
+
+'卸分は、全部調べる
+With PurchaseReqWholesall
+    EndRow = Range("A1").End(xlDown).Row
+    
+    For i = 2 To EndRow
+        
+        If .Cells(i, 3).Value = "" Then Exit For
+        
+        Code = .Cells(i, 3).Value
+        
+        If Not .Cells(i, 3).Value Like String(13, "#") Then GoTo Continue2
+
+        Sql = "SELECT 商品コード FROM 商品マスタ WHERE JANコード = '" & Code & "'"
+        
+        Set DbRs = DbCnn.Execute(Sql)
+    
+        If Not DbRs.EOF Then
+            .Cells(i, 3).NumberFormatLocal = "@"
+            .Cells(i, 3).Value = IIf(Len(DbRs("商品コード")) = 5, "0" & CStr(DbRs("商品コード")), CStr(DbRs("商品コード")))
+        End If
+    
+Continue2:
     Next
 
 End With
