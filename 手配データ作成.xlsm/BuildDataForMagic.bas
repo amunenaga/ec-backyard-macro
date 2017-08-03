@@ -1,6 +1,8 @@
 Attribute VB_Name = "BuildDataForMagic"
 Option Explicit
-Const OPERATOR_CODE As Integer = 329
+Const DEFAULT_OPERATOR_CODE As Integer = 329
+
+Dim CurrentOperator As Integer
 
 Type Purchase
 '手配数量入力シート1行分に相当するユーザー定義型
@@ -37,6 +39,17 @@ For Each Sh In Array(Worksheets("Magic一括登録"), Worksheets("Magic手入力用"), W
     Call PrepareSheet(Sh)
 Next
 
+'担当者コード欄が空か数字3ケタでなければ、担当者コード329でデータ作成
+Dim InputOpCode As Variant
+InputOpCode = InputSp.Range("G3").Value
+
+If Not InputOpCode Like "###" Then
+    MsgBox Prompt:="手入力シートで設定された担当者コードの形式が合いません。" & vbCrLf & "担当者コード329でデータ作成します。", _
+            Buttons:=vbExclamation
+Else
+    CurrentOperator = InputOpCode
+End If
+
 'データ出力用のシートに、1行ずつコピー
 Worksheets("手配数量入力シート").Activate
 
@@ -66,21 +79,8 @@ Worksheets("Magic一括登録").Columns("A:E").AutoFit
 Worksheets("Magic手入力用").Columns("A:I").AutoFit
 
 '出力用シートをファイルとして保存していく
-
-'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
-Worksheets("Magic一括登録").Copy
-ActiveSheet.Rows(1).Delete
-
-Dim FileName As String
-FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
-
-If Dir(ThisWorkbook.path & FileName) <> "" Then
-    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
-End If
-
-Application.DisplayAlerts = False
-    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
-    ActiveWorkbook.Close
+'発注システム用テキストファイルを出力
+Call PutTxtFileForMagic
 
 'バックアップを保存
 ThisWorkbook.Worksheets("発注商品リスト").Copy
@@ -97,6 +97,7 @@ ActiveWorkbook.Close
 '保留を保存
 Worksheets("保留").Copy
 
+Dim FileName As String
 FileName = "\保留" & Format(Date, "MMdd") & ".xlsx"
 
 If Dir(ThisWorkbook.path & FileName) <> "" Then
@@ -114,6 +115,7 @@ ActiveWorkbook.Close
 
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
+ActiveWorkbook.Worksheets(1).Buttons(1).Delete
 
 FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
 
@@ -186,7 +188,7 @@ Private Sub WriteMagicTxt(ByRef Purchase As Purchase)
                     .Code, _
                     .PurchaseQuantity, _
                     .IsPickup, _
-                    OPERATOR_CODE _
+                    CurrentOperator _
                     )
     End With
     
@@ -216,7 +218,7 @@ Private Sub WriteMagicManualInput(ByRef Purchase As Purchase)
                     .PurchaseQuantity, _
                     .UnitCost, _
                     .IsPickup, _
-                    OPERATOR_CODE _
+                    CurrentOperator _
                     )
     End With
     
@@ -282,3 +284,76 @@ Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
     End With
     
 End Sub
+
+Private Sub FixedWriteBackupSheet(ByRef Purchase As Purchase)
+'列数修正版、返信FAX追記モジュール有効化したら、こちらを使う
+    Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
+    
+    With Purchase
+        Record = Array( _
+                    .WarehouseNumber, _
+                    .VendorName, _
+                    .RequireMallCount, _
+                    Date, _
+                    .Code, _
+                    .ProductName, _
+                    .PurchaseQuantity _
+                    )
+    End With
+    
+    With Worksheets("発注商品リスト")
+        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
+    
+        .Cells(WriteRow, 4).NumberFormatLocal = "Mdd"
+        
+        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
+    End With
+    
+End Sub
+
+Sub PutTxtFileForMagic()
+
+'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
+If Worksheets("Magic一括登録").Buttons.Count > 0 Then
+    Worksheets("Magic一括登録").Buttons(1).Delete
+End If
+
+Worksheets("Magic一括登録").Copy
+ActiveSheet.Rows(1).Delete
+
+Dim FileName As String
+FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
+
+If Dir(ThisWorkbook.path & FileName) <> "" Then
+    FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
+End If
+
+Application.DisplayAlerts = False
+    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
+    ActiveWorkbook.Close
+
+
+'データ出力のボタンを配置
+With Worksheets("Magic一括登録")
+    
+    .Activate
+    
+    If .Buttons.Count > 0 Then Exit Sub
+    
+    With .Buttons.Add( _
+        Range("G2").Left, _
+        Range("G2").Top + 20, _
+        200, _
+        30 _
+        )
+        
+        .OnAction = "PutTxtFileForMagic"
+        .Characters.Text = "発注システム用テキストファイル再出力"
+        .Name = "PutDataButton"
+        
+    End With
+
+End With
+
+End Sub
+
