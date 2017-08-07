@@ -110,12 +110,10 @@ ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 Call AppendHoldPurWokbook(ActiveWorkbook)
 ActiveWorkbook.Close
 
-'返信FAXリストへ追記
-'Call AppendRefaxList
 
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
-ActiveWorkbook.Worksheets(1).Buttons(1).Delete
+ActiveWorkbook.Worksheets("Magic一括登録").Buttons(1).Delete
 
 FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
 
@@ -131,7 +129,12 @@ ThisWorkbook.Save
 
 Application.DisplayAlerts = True
 
-MsgBox Prompt:="ファイル保存が完了しました。", Buttons:=vbInformation
+MsgBox Prompt:="ファイル保存が完了しました。" & vbLf & "続けて返信FAXリスト転記を行います。", Buttons:=vbInformation
+
+'返信FAXリストへ追記
+Call AppendRefaxList
+
+MsgBox Prompt:="処理が完了しました。", Buttons:=vbInformation
 
 End Sub
 
@@ -259,34 +262,6 @@ End Sub
 
 Private Sub WriteBackupSheet(ByRef Purchase As Purchase)
 
-    Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
-    
-    With Purchase
-        Record = Array( _
-                    .WarehouseNumber, _
-                    .VendorName, _
-                    .RequireMallCount, _
-                    Date, _
-                    .Code, _
-                    .Code, _
-                    .ProductName, _
-                    .Code, _
-                    .PurchaseQuantity _
-                    )
-    End With
-    
-    With Worksheets("発注商品リスト")
-        WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
-    
-        .Cells(WriteRow, 4).NumberFormatLocal = "Mdd"
-        
-        .Cells(WriteRow, 1).Resize(1, UBound(Record) + 1).Value = Record
-    End With
-    
-End Sub
-
-Private Sub FixedWriteBackupSheet(ByRef Purchase As Purchase)
-'列数修正版、返信FAX追記モジュール有効化したら、こちらを使う
     Dim WriteRow As Long, TargetSheet As Worksheet, Record As Variant
     
     With Purchase
