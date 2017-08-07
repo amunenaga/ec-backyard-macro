@@ -12,7 +12,7 @@ Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 RefaxSheet.Activate
 
 If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value) < 1 Then
-    RefaxBook.Close
+    RefaxBook.Close SaveChanges:=False
     Exit Sub
 End If
 '返信FAXの最終の空白行へ書き込む
