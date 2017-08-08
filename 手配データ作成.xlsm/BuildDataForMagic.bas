@@ -110,10 +110,8 @@ ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
 Call AppendHoldPurWokbook(ActiveWorkbook)
 ActiveWorkbook.Close
 
-
 'Magic入力用Excelファイルを保存
 Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
-ActiveWorkbook.Worksheets("Magic一括登録").Buttons(1).Delete
 
 FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
 
@@ -289,9 +287,6 @@ End Sub
 Sub PutTxtFileForMagic()
 
 'Magic一括登録シートを新規ブックにコピー、拡張子.txt、カンマ区切り、ヘッダー無しで保存
-If Worksheets("Magic一括登録").Buttons.Count > 0 Then
-    Worksheets("Magic一括登録").Buttons(1).Delete
-End If
 
 Worksheets("Magic一括登録").Copy
 ActiveSheet.Rows(1).Delete
@@ -306,29 +301,6 @@ End If
 Application.DisplayAlerts = False
     ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
     ActiveWorkbook.Close
-
-
-'データ出力のボタンを配置
-With Worksheets("Magic一括登録")
-    
-    .Activate
-    
-    If .Buttons.Count > 0 Then Exit Sub
-    
-    With .Buttons.Add( _
-        Range("G2").Left, _
-        Range("G2").Top + 20, _
-        200, _
-        30 _
-        )
-        
-        .OnAction = "PutTxtFileForMagic"
-        .Characters.Text = "発注システム用テキストファイル再出力"
-        .Name = "PutDataButton"
-        
-    End With
-
-End With
 
 End Sub
 
