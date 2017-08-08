@@ -11,7 +11,7 @@ Set RefaxSheet = RefaxBook.Worksheets("”[ŠúƒŠƒXƒg")
 
 RefaxSheet.Activate
 
-If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value) < 1 Then
+If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value) >= 0 Then
     RefaxBook.Close SaveChanges:=False
     Exit Sub
 End If
