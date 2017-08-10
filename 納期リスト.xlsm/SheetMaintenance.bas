@@ -17,7 +17,7 @@ With Worksheets("納期リスト")
     'T列で14日前の日付の行を取得、土日は手配入力がないため検索条件は「以下」でセット、日付の検索時はダブル型でシリアル化する
     WeekBeforeLastRow = WorksheetFunction.Match(CDbl(DateAdd("d", -14, Date)), .Range(Cells(1, 5), Cells(Endrow, 5)), 1) + 1
 
-    Set LatestArrivalRange = Range(Cells(WeekBeforeLastRow, 10), Cells(Endrow, 10))
+    Set LatestArrivalRange = Range(Cells(WeekBeforeLastRow, 12), Cells(Endrow, 12))
 
     .Cells.FormatConditions(1).ModifyAppliesToRange LatestArrivalRange
 
@@ -41,9 +41,9 @@ EtaSheet.Activate
 Endrow = EtaSheet.Range("F2").End(xlDown).Row
 
 '最初のデータが1ヶ月以上前なら、旧シートへコピーするために2行目をコピー対象範囲としてをセット
-If DateDiff("d", Date, Cells(2, 6).Value) < -30 Then
+If DateDiff("d", Date, Cells(2, 5).Value) < -30 Then
     Dim TargetRange As Range
-    Set TargetRange = Range("A2:AA2")
+    Set TargetRange = Range("A2:M2")
 Else
     Exit Sub
 End If
@@ -53,10 +53,10 @@ i = 2
 
 Do
 
-    Set TargetRange = Union(TargetRange, EtaSheet.Range(Cells(i, 1), Cells(i, 27)))
+    Set TargetRange = Union(TargetRange, EtaSheet.Range(Cells(i, 1), Cells(i, 13)))
     i = i + 1
 
-Loop While DateDiff("d", Date, Cells(i, 6).Value) < -30
+Loop While DateDiff("d", Date, Cells(i, 5).Value) < -30
 
 '1ヶ月以上前の範囲をコピーして削除
 TargetRange.Copy
