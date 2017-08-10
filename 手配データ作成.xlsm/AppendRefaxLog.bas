@@ -70,7 +70,7 @@ If Range("A2").Value <> "" Then
     DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 6) '¤•i–¼
     
     DataCol.Offset(0, 0).Copy
-    WriteCell.Offset(0, 10).PasteSpecial Paste:=xlPasteValues   '•Û—¯——R
+    WriteCell.Offset(0, 9).PasteSpecial Paste:=xlPasteValues   '•Û—¯——R
 
 End If
 
