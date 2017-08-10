@@ -11,7 +11,7 @@ Set RefaxSheet = RefaxBook.Worksheets("納期リスト")
 
 RefaxSheet.Activate
 
-If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 6).Value) >= 0 Then
+If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 5).Value) >= 0 Then
     RefaxBook.Close SaveChanges:=False
     Exit Sub
 End If
@@ -34,11 +34,11 @@ End If
 
 DataCol.Offset(0, 6).Copy Destination:=WriteCell '発注数量
 DataCol.Offset(0, 0).Copy Destination:=WriteCell.Offset(0, 1) '注番
-DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 3) '仕入先
-DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 4) 'モール識別記号
-DataCol.Offset(0, 3).Copy Destination:=WriteCell.Offset(0, 5) '日付
-DataCol.Offset(0, 4).Copy Destination:=WriteCell.Offset(0, 8) '商品コード
-DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 10) '商品名
+DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 2) '仕入先
+DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 3) 'モール識別記号
+DataCol.Offset(0, 3).Copy Destination:=WriteCell.Offset(0, 4) '日付
+DataCol.Offset(0, 4).Copy Destination:=WriteCell.Offset(0, 5) '商品コード
+DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 6) '商品名
 
 
 '同様に保留シートからデータをコピー
@@ -63,14 +63,14 @@ If Range("A2").Value <> "" Then
     WriteCell.Resize(UBound(HoldQty), 1).Value = HoldQty
     
     DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 1) '注番
-    DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 3) '仕入先
-    DataCol.Offset(0, 3).Copy Destination:=WriteCell.Offset(0, 4) 'モール識別記号
-    DataCol.Offset(0, 4).Copy Destination:=WriteCell.Offset(0, 5) '日付
-    DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 8) '手配時商品コード
-    DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 10) '商品名
+    DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 2) '仕入先
+    DataCol.Offset(0, 3).Copy Destination:=WriteCell.Offset(0, 3) 'モール識別記号
+    DataCol.Offset(0, 4).Copy Destination:=WriteCell.Offset(0, 4) '日付
+    DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 5) '手配時商品コード
+    DataCol.Offset(0, 7).Copy Destination:=WriteCell.Offset(0, 6) '商品名
     
     DataCol.Offset(0, 0).Copy
-    WriteCell.Offset(0, 22).PasteSpecial Paste:=xlPasteValues   '保留理由
+    WriteCell.Offset(0, 10).PasteSpecial Paste:=xlPasteValues   '保留理由
 
 End If
 
