@@ -52,7 +52,7 @@ Select Case True
         Mall = "SP"
 End Select
 
-'ピッキングシートブックを開く、アクティブなまま使う
+'ピッキングシートブックを開く
 On Error Resume Next
     
     Workbooks.Open FileName:=PICKING_FOLDER & FileName
@@ -60,27 +60,30 @@ On Error Resume Next
 
 On Error GoTo 0
 
+Dim NoLocationSheet As Worksheet
+Set NoLocationSheet = ActiveSheet
 
-'開いているピッキングシートから、手配依頼読込シートへデータコピー
-With ThisWorkbook.Worksheets("セラー分")
-    Dim WriteRow As Long, i As Long
-    WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
+
+'開いているピッキングシートから、背景色を判定しつつ1行ずつデータコピー
+Dim WriteRow As Long, i As Long
+WriteRow = IIf(PurchaseReqSeller.Range("A2").Value = "", 2, PurchaseReqSeller.Range("A1").End(xlDown).Row + 1)
+
+For i = 3 To NoLocationSheet.Range("A1").SpecialCells(xlLastCell).Row
     
-    For i = 3 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
+    If NoLocationSheet.Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
         
-        If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
-            
-            '背景白でない行を一旦コピー
-            Range(Cells(i, 2), Cells(i, 5)).Copy
-            '値で貼り付け
-            .Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
-            
-            .Cells(WriteRow, 1).Value = Mall
-            
-            WriteRow = WriteRow + 1
-        End If
-    Next
-End With
+        'ピッキング-aの背景白でない行を一旦コピー
+        NoLocationSheet.Range(Cells(i, 2), Cells(i, 5)).Copy
+        '値で貼り付け
+        PurchaseReqSeller.Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
+        
+        PurchaseReqSeller.Cells(WriteRow, 1).Value = Mall
+        
+        WriteRow = WriteRow + 1
+        
+    End If
+
+Next
 
 ActiveWorkbook.Close SaveChanges:=False
 
@@ -88,41 +91,43 @@ End Sub
 Private Sub LoadPoFile(ByVal FileName As String)
 'Amazon卸のピッキングファイル読み込み
 
-'ピッキングシートブックを開く、アクティブなまま使う
+'ピッキングシートブックを開く
 On Error Resume Next
+
     Workbooks.Open FileName:=PICKING_FOLDER & FileName
     If Err Then Exit Sub
 
 On Error GoTo 0
 
+Dim NoLocationSheet As Worksheet
+Set NoLocationSheet = ActiveSheet
 
 '開いているピッキングシートから、手配依頼読込シートへデータコピー
-With ThisWorkbook.Worksheets("卸分")
-    Dim WriteRow As Long, i As Long
-    WriteRow = IIf(.Range("A2").Value = "", 2, .Range("A1").End(xlDown).Row + 1)
+
+Dim WriteRow As Long, i As Long
+WriteRow = IIf(PurchaseReqWholesall.Range("A2").Value = "", 2, PurchaseReqWholesall.Range("A1").End(xlDown).Row + 1)
+
+For i = 2 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
     
-    For i = 2 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
+    If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
         
-        If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
-            
-            'POとJANをコピー・貼り付け
-            Range(Cells(i, 1), Cells(i, 2)).Copy
-            .Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
-            
-            '商品名
-            Cells(i, 5).Copy
-            .Cells(WriteRow, 4).PasteSpecial Paste:=xlPasteValues
-            
-            '数量
-            Cells(i, 9).Copy
-            .Cells(WriteRow, 5).PasteSpecial Paste:=xlPasteValues
-            
-            .Cells(WriteRow, 1).Value = "V"
-            
-            WriteRow = WriteRow + 1
-        End If
-    Next
-End With
+        'POとJANをコピー・貼り付け
+        NoLocationSheet.Range(Cells(i, 1), Cells(i, 2)).Copy
+        PurchaseReqWholesall.Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
+        
+        '商品名
+        NoLocationSheet.Cells(i, 5).Copy
+        PurchaseReqWholesall.Cells(WriteRow, 4).PasteSpecial Paste:=xlPasteValues
+        
+        '数量
+        NoLocationSheet.Cells(i, 9).Copy
+        PurchaseReqWholesall.Cells(WriteRow, 5).PasteSpecial Paste:=xlPasteValues
+        
+        PurchaseReqWholesall.Cells(WriteRow, 1).Value = "V"
+        
+        WriteRow = WriteRow + 1
+    End If
+Next
 
 ActiveWorkbook.Close SaveChanges:=False
 
@@ -171,7 +176,6 @@ Next
 End Sub
 
 Private Sub VerifySyokonRegist()
-
 
 '接続のためのオブジェクトを定義、DB接続設定をセット
 Dim DbCnn As New ADODB.Connection
