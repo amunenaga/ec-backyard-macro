@@ -47,20 +47,31 @@ ThisWorkbook.Worksheets("保留").Activate
 Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
 
 If Range("A2").Value <> "" Then
-    Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+    Set DataCol = Range(Cells(2, 1), Cells(1, 1).End(xlDown))
     
     RefaxSheet.Activate
     Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
     
     '数量の頭に「保留」文言を入れて貼り付け
     Dim HoldQty As Variant, i As Long
+    'HoldQtyは二次元配列で格納される
     HoldQty = DataCol.Offset(0, 6).Value
     
-    For i = 1 To UBound(HoldQty)
-        HoldQty(i, 1) = "保留：" & HoldQty(i, 1)
-    Next
+    '保留が1行の時は、配列にならない
+    If IsArray(HoldQty) Then
+        
+        For i = 1 To UBound(HoldQty)
+            HoldQty(i, 1) = "保留：" & HoldQty(i, 1)
+        Next
+        WriteCell.Resize(UBound(HoldQty), 1).Value = HoldQty
     
-    WriteCell.Resize(UBound(HoldQty), 1).Value = HoldQty
+    Else
+    
+        WriteCell.Value = "保留：" & HoldQty
+    
+    End If
+    
+
     
     DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 1) '注番
     DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 2) '仕入先
