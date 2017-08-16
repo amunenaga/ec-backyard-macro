@@ -100,11 +100,11 @@ Worksheets("保留").Copy
 Dim FileName As String
 FileName = "\保留" & Format(Date, "MMdd") & ".xlsx"
 
-If Dir(ThisWorkbook.path & FileName) <> "" Then
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName
 
 'c保留へ追記してから閉じる
 Call AppendHoldPurWokbook(ActiveWorkbook)
@@ -115,11 +115,11 @@ Sheets(Array("Magic一括登録", "Magic手入力用")).Copy
 
 FileName = "\Magic入力データ" & Format(Date, "MMdd") & ".xlsx"
 
-If Dir(ThisWorkbook.path & FileName) <> "" Then
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
-ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName
+ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName
 ActiveWorkbook.Close
 
 'ファイル出力完了、このブックを保存
@@ -294,12 +294,12 @@ ActiveSheet.Rows(1).Delete
 Dim FileName As String
 FileName = "\Magic登録用" & Format(Date, "MMdd") & ".txt"
 
-If Dir(ThisWorkbook.path & FileName) <> "" Then
+If Dir(ThisWorkbook.Path & FileName) <> "" Then
     FileName = Replace(FileName, Format(Date, "MMdd"), Format(Date, "MMdd") & "-" & Format(Time, "hhmm"))
 End If
 
 Application.DisplayAlerts = False
-    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.path & FileName, FileFormat:=xlCSV
+    ActiveWorkbook.SaveAs FileName:=ThisWorkbook.Path & FileName, FileFormat:=xlCSV
     ActiveWorkbook.Close
 
 End Sub
