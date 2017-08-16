@@ -1,9 +1,12 @@
 Attribute VB_Name = "FetchDataForPuchase"
 Option Explicit
 
-Sub CreateQuantitySheet()
+Const PICKING_FOLDER As String = "\\server02\¤•i•”\ƒlƒbƒg”Ì”„ŠÖ˜A\ƒsƒbƒLƒ“ƒO\"
+
+Sub CreateQuantitySheet(Optional ByRef SelectFolder As Integer)
 'ƒsƒbƒLƒ“ƒOƒV[ƒg‚©‚çè”zˆË—Š•ª‚ğ“Ç‚İ‚ñ‚ÅA¤•i•Ê‚ÉWŒvAd“üæƒf[ƒ^‚È‚Ç‚ğ¤°‚©‚ç“Ç
-'uè”z”“ü—ÍƒV[ƒgì¬vƒ{ƒ^ƒ“‚ÅŒÄ‚Ño‚³‚ê‚é
+'uè”z”“ü—ÍƒV[ƒgì¬vƒ{ƒ^ƒ“‚ÅŒÄ‚Ño‚³‚ê‚éAuƒtƒHƒ‹ƒ_w’è‚µ‚Äè”z”“ü—ÍƒV[ƒgì¬v‚Íˆø” 1 ‚ª“n‚³‚ê‚éB
+'SelectFolderˆø”‚ª1‚È‚çAƒtƒHƒ‹ƒ_w’è‚µ‚Ä‚Ìƒtƒ@ƒCƒ‹“Ç‚İ‚İ‚É‚È‚è‚Ü‚·B
 
 Application.ScreenUpdating = False
 Application.DisplayAlerts = False
@@ -14,10 +17,32 @@ For Each Sh In Array(Worksheets("ƒZƒ‰[•ª"), Worksheets("‰µ•ª"), Worksheets("è”
     Call PrepareSheet(Sh)
 Next
 
-'ƒAƒ}ƒ]ƒ“EŠy“VEƒ„ƒt[‚ÌŠe’I‚È‚µƒsƒbƒLƒ“ƒOƒV[ƒgAƒAƒ}ƒ]ƒ“‰µ‚Ìè”zˆË—Š“Ç
-Call LoadPurchaseReq.LoadAllPicking
+'ƒsƒbƒLƒ“ƒOƒtƒ@ƒCƒ‹‚Ì‚ ‚éƒtƒHƒ‹ƒ_[ƒpƒX‚Ìw’è
+Dim TargetFolder As String
 
-ThisWorkbook.SaveAs FileName:=ThisWorkbook.path & "\" & "è”zƒf[ƒ^" & Format(Date, "MMdd") & ".xlsm"
+If SelectFolder = 1 Then
+    
+    With Application.FileDialog(msoFileDialogFolderPicker)
+        
+        If .Show = True Then
+            TargetFolder = .SelectedItems(1)
+        Else
+            MsgBox Prompt:="ƒtƒHƒ‹ƒ_w’è‚ªƒLƒƒƒ“ƒZƒ‹‚³‚ê‚Ü‚µ‚½B" & vbLf & "ƒ}ƒNƒ‚ğI—¹‚µ‚Ü‚·B"
+            Exit Sub
+        End If
+    
+    End With
+    
+Else
+    
+    TargetFolder = PICKING_FOLDER
+
+End If
+
+'ƒAƒ}ƒ]ƒ“EŠy“VEƒ„ƒt[‚ÌŠe’I‚È‚µƒsƒbƒLƒ“ƒOƒV[ƒgAƒAƒ}ƒ]ƒ“‰µ‚Ìè”zˆË—Š“Ç
+Call LoadPurchaseReq.LoadAllPicking(TargetFolder)
+
+ThisWorkbook.SaveAs FileName:=ThisWorkbook.Path & "\" & "è”zƒf[ƒ^" & Format(Date, "MMdd") & ".xlsm"
 
 Worksheets("è”z”—Ê“ü—ÍƒV[ƒg").Activate
 

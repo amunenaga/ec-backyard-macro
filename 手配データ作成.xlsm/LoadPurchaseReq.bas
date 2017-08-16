@@ -1,33 +1,22 @@
 Attribute VB_Name = "LoadPurchaseReq"
 Option Explicit
 
-Const PICKING_FOLDER As String = "\\server02\商品部\ネット販売関連\ピッキング\"
-
-Sub LoadAllPicking()
+Sub LoadAllPicking(Optional ByRef TargetFolder As String)
 '手配依頼チェック済のピッキングファイルを一括して読込
 '手配依頼として背景色が変えてある行をコピーします。
 
+Dim PickingFilePaths() As String
+PickingFilePaths = SearchPickingFiles(TargetFolder)
+
 'セラー分ピッキングファイル読み込み
-Dim PickingFiles As Variant, File As Variant
-
-PickingFiles = Array( _
-    "ピッキングシート", _
-    "楽天Pシート", _
-    "ヤフーPシート" _
-    )
-
-For Each File In PickingFiles
-    Call LoadSellerPicking(CStr(File) & Format(Date, "MMdd") & "-a.xlsx")
+Dim Path As Variant
+For Each Path In Array(PickingFilePaths(0), PickingFilePaths(1), PickingFilePaths(2))
+    Call LoadSellerPicking(Path)
 Next
 
-'卸分 ファイル読み込み
-PickingFiles = Array( _
-    "アマゾン棚なし" & Format(Date, "MMdd") & ".xlsx", _
-    "アマゾン棚なし" & Format(Date, "MMdd") & "-outdoor.xlsx" _
-    )
-    
-For Each File In PickingFiles
-    Call LoadPoFile(CStr(File))
+'卸分ピッキングファイル読み込み
+For Each Path In Array(PickingFilePaths(3), PickingFilePaths(4))
+    Call LoadPoFile(Path)
 Next
 
 Call ApendSpToPurchseReq
@@ -35,18 +24,18 @@ Call VerifySyokonRegist
 
 End Sub
 
-Private Sub LoadSellerPicking(ByVal FileName As String)
+Private Sub LoadSellerPicking(ByVal PickingFilePath As String)
 'セラー分のピッキングファイル読み込み
 
-Dim Mall As String, PickingFileName As String
+Dim Mall As String
 
 'ピッキングシート名からモール記号をセット
 Select Case True
-    Case FileName Like "ピッキング*"
+    Case PickingFilePath Like "*ピッキングシート*"
         Mall = "A"
-    Case FileName Like "楽天*"
+    Case PickingFilePath Like "*楽天*"
         Mall = "R"
-    Case FileName Like "ヤフー*"
+    Case PickingFilePath Like "*ヤフー*"
         Mall = "Y"
     Case Else
         Mall = "SP"
@@ -55,7 +44,7 @@ End Select
 'ピッキングシートブックを開く
 On Error Resume Next
     
-    Workbooks.Open FileName:=PICKING_FOLDER & FileName
+    Workbooks.Open FileName:=PickingFilePath
     If Err Then Exit Sub
 
 On Error GoTo 0
@@ -88,13 +77,13 @@ Next
 ActiveWorkbook.Close SaveChanges:=False
 
 End Sub
-Private Sub LoadPoFile(ByVal FileName As String)
+Private Sub LoadPoFile(ByVal PickingFilePath As String)
 'Amazon卸のピッキングファイル読み込み
 
 'ピッキングシートブックを開く
 On Error Resume Next
 
-    Workbooks.Open FileName:=PICKING_FOLDER & FileName
+    Workbooks.Open FileName:=PickingFilePath
     If Err Then Exit Sub
 
 On Error GoTo 0
@@ -247,4 +236,62 @@ End With
 
 End Sub
 
+Private Function SearchPickingFiles(Optional ByRef FolderPath As String) As String()
+'フォルダ指定を元に、ピッキングファイルのパスを配列で返します。
 
+'PickingFiles(0) : Amazonセラー
+'PickingFiles(1) : 楽天
+'PickingFiles(2) : ヤフー
+'PickingFiles(3) : Amazon卸
+'PickingFiles(4) : Amazon卸アウトドアカテゴリ
+
+Dim Fso As New FileSystemObject, PickingFolder As Folder, File As File
+
+Set PickingFolder = Fso.GetFolder(FolderPath)
+Dim PickingFiles(4) As String
+
+For Each File In PickingFolder.Files
+
+    Select Case True
+        Case File.Name Like "ピッキングシート*-a*"
+            PickingFiles(0) = FolderPath & "\" & File.Name
+            
+        Case File.Name Like "楽天*-a*"
+            PickingFiles(1) = FolderPath & "\" & File.Name
+            
+        Case File.Name Like "ヤフー*-a*"
+            PickingFiles(2) = FolderPath & "\" & File.Name
+        
+        Case File.Name Like "アマゾン棚なし####.xlsx"
+            PickingFiles(3) = FolderPath & "\" & File.Name
+            
+        Case File.Name Like "アマゾン棚なし*-outdoor*"
+            PickingFiles(4) = FolderPath & "\" & File.Name
+    
+    End Select
+        
+Next
+
+SearchPickingFiles = PickingFiles
+
+End Function
+Private Sub TestGetPickingFiles()
+
+Dim Files As Variant, File As Variant
+
+Files = GetPickingFiles(PICKING_FOLDER)
+
+For Each File In Files
+
+    Debug.Print File
+
+    If File Like "*ピッキングシート*" Then
+        Debug.Print "Amazon OK"
+    ElseIf File Like "*楽天*" Then
+        Debug.Print "楽天 OK"
+    ElseIf File Like "*ヤフー*" Then
+        Debug.Print "ヤフー OK"
+    End If
+Next
+
+End Sub
