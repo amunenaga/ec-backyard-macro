@@ -119,6 +119,8 @@ For Each r In CodeRange
     Dim Sql As String, Code As String
     Code = r.Value
         
+    If Not (Code Like String(6, "#") Or Code Like String(13, "#")) Then GoTo Continue
+        
     Sql = "SELECT 商品コード, 取扱区分, ロット数, 仕入原価, 仕入先, 仕入先マスタ.仕入先略称, 仕入先マスタ.発注区分 " & _
           "FROM 商品マスタ JOIN 仕入先マスタ ON 商品マスタ.仕入先 = 仕入先マスタ.仕入先コード " & _
           "WHERE 商品コード = " & Code & "OR JANコード = '" & Code & "'"
@@ -126,20 +128,17 @@ For Each r In CodeRange
     Set DbRs = DbCnn.Execute(Sql)
 
     If Not DbRs.EOF Then
+    
         Cells(r.Row, 3).Value = DbRs("ロット数")
         Cells(r.Row, 4).Value = DbRs("仕入先")
         Cells(r.Row, 5).Value = DbRs("仕入先略称")
         Cells(r.Row, 10).Value = DbRs("仕入原価")
         Cells(r.Row, 2).Value = GetKubunLabel(DbRs("取扱区分"))
         Cells(r.Row, 11).Value = DbRs("発注区分")
-        
-        'JAN受注分の商品コード置換、主にAmazon卸用
-        If Len(Code) > 6 Then
-            r.NumberFormatLocal = "@"
-            r.Value = IIf(Len(DbRs("商品コード")) = 5, "0" & DbRs("商品コード"), DbRs("商品コード"))
-        End If
     
     End If
+    
+Continue:
 
 Next
 
