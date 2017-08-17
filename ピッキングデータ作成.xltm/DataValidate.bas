@@ -91,7 +91,7 @@ Dim FixedCode As String
 'アルファベットを削除
 Dim Reg As New RegExp
 Reg.Global = True
-Reg.Pattern = "[a-zA-Z]"
+Reg.Pattern = "[a-zA-Z\s]"
 Code = Reg.Replace(Code, "")
 
 '6ケタならそのまま入れる
