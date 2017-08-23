@@ -16,18 +16,18 @@ If DateDiff("d", Date, Cells(Range("A1").CurrentRegion.Rows.Count, 5).Value) >= 
     Exit Sub
 End If
 '返信FAXの最終の空白行へ書き込む
-Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
+Set WriteCell = RefaxSheet.Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
 
 '発注商品リストからデータをコピー
-Dim DataCol As Range
+Dim DataCol As Range, PurchaseSheet As Worksheet
 ThisWorkbook.Worksheets("発注商品リスト").Activate
-Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
+ThisWorkbook.Worksheets("発注商品リスト").Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
 
 If Range("A2").Value = "" Then
     RefaxBook.Close SaveChanges:=True
     Exit Sub
 Else
-    Set DataCol = Range(Cells(2, 1), Cells(2, 1).End(xlDown))
+    Set DataCol = ThisWorkbook.Worksheets("発注商品リスト").Range(Cells(2, 1), Cells(2, 1).End(xlDown))
 End If
 
 'DataColレンジとWriteCellを右へオフセットしながらデータをコピーしていく。
@@ -43,14 +43,16 @@ DataCol.Offset(0, 5).Copy Destination:=WriteCell.Offset(0, 6) '商品名
 
 '同様に保留シートからデータをコピー
 
+Dim HoldSheet As Worksheet
 ThisWorkbook.Worksheets("保留").Activate
+
 Range("A1").CurrentRegion.Borders.LineStyle = xlContinuous
 
 If Range("A2").Value <> "" Then
-    Set DataCol = Range(Cells(2, 1), Cells(1, 1).End(xlDown))
+    Set DataCol = Worksheets("保留").Range(Cells(2, 1), Cells(1, 1).End(xlDown))
     
     RefaxSheet.Activate
-    Set WriteCell = Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
+    Set WriteCell = RefaxSheet.Cells(Range("A1").CurrentRegion.Rows.Count, 1).Offset(1, 0)
     
     '数量の頭に「保留」文言を入れて貼り付け
     Dim HoldQty As Variant, i As Long
@@ -70,8 +72,6 @@ If Range("A2").Value <> "" Then
         WriteCell.Value = "保留：" & HoldQty
     
     End If
-    
-
     
     DataCol.Offset(0, 1).Copy Destination:=WriteCell.Offset(0, 1) '注番
     DataCol.Offset(0, 2).Copy Destination:=WriteCell.Offset(0, 2) '仕入先
