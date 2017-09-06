@@ -76,7 +76,7 @@ Reg.Pattern = ",|\!|\.|&"
 Name = Reg.Replace(Name, "")
 
 
-Reg.Pattern = "^((≪|【).*?(】|≫))*"
+Reg.Pattern = "^((≪|【|\().*?(】|≫|\)))*"
 Name = Reg.Replace(Name, "")
 
 ValidateName = Name
@@ -177,3 +177,17 @@ End If
 
 End Sub
 
+Sub テスト_セール文言削除()
+
+Dim OrderedProduct As String, ValidName As String
+OrderedProduct = "(期間限定 ポイント10倍)38735操法用ゼッケン3 オレンジ"
+
+ValidName = ValidateName(OrderedProduct)
+
+If ValidName Like "*ポイント#*倍*" Then
+    Debug.Print "RED:Did not cut salecopy"
+Else
+    Debug.Print "Green:Success cut SaleCopy"
+End If
+
+End Sub
