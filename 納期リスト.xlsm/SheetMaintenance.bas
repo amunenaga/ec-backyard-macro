@@ -10,12 +10,13 @@ Sub 条件付き書式範囲修正()
 '@URL:http://www.relief.jp/docs/excel-vba-check-if-has-format-conditions.html
 
 With Worksheets("納期リスト")
+    .Activate
 
     Dim WeekBeforeLastRow As Long, Endrow As Long, LatestArrivalRange
     Endrow = .Range("E2").End(xlDown).Row
     
     'T列で14日前の日付の行を取得、土日は手配入力がないため検索条件は「以下」でセット、日付の検索時はダブル型でシリアル化する
-    WeekBeforeLastRow = WorksheetFunction.Match(CDbl(DateAdd("d", -14, Date)), .Range(Cells(1, 5), Cells(Endrow, 5)), 1) + 1
+    WeekBeforeLastRow = WorksheetFunction.Match(CDbl(DateAdd("d", -14, Date)), .Range(.Cells(1, 5), .Cells(Endrow, 5)), 1) + 1
 
     Set LatestArrivalRange = Range(Cells(WeekBeforeLastRow, 12), Cells(Endrow, 12))
 
