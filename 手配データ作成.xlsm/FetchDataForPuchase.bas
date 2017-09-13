@@ -184,16 +184,16 @@ For Each r In CodeRange
         End If
             
     '手配時注意、メーカーロット、仕入先名
-    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 16).Value '手配時注意
+    Cells(r.Row, 2).Value = Cells(r.Row, 2).Value & DataSheet.Cells(HitRow, 11).Value '手配時注意
     Cells(r.Row, 12).Value = DataSheet.Cells(HitRow, 5).Value '発注用商品情報のロット数
     Cells(r.Row, 13).Value = DataSheet.Cells(HitRow, 4).Value '仕入先名
     
     '仕入先コード、原価、仕入先名は6ケタにない時のみ入れる
     If IsEmpty(Cells(r.Row, 4).Value) Then
     
-        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 13).Value '仕入先コード
+        Cells(r.Row, 4).Value = DataSheet.Cells(HitRow, 8).Value '仕入先コード
         Cells(r.Row, 5).Value = DataSheet.Cells(HitRow, 4).Value '仕入先名
-        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 11).Value '原価
+        Cells(r.Row, 10).Value = DataSheet.Cells(HitRow, 6).Value '原価
 
     End If
 
