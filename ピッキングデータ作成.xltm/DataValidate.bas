@@ -92,26 +92,26 @@ Dim FixedCode As String
 Dim Reg As New RegExp
 Reg.Global = True
 Reg.Pattern = "[a-zA-Z\s]"
-Code = Reg.Replace(Code, "")
+FixedCode = Reg.Replace(Code, "")
 
 '6ケタならそのまま入れる
 If Code Like String(6, "#") Then
-    FixedCode = Code
-
+    FixedCode = FixedCode
+    
 '数字5ケタは頭にゼロを追記
 ElseIf Code Like String(5, "#") Then
     
-    FixedCode = "0" & Code
+    FixedCode = "0" & FixedCode
 
 'JANもそのまま入れる
 ElseIf Code Like String(13, "#") Then
     
-    FixedCode = Code
+    FixedCode = FixedCode
     
 '数字7ケタ以上12ケタなら、13ケタになるよう先頭に0を追記
 ElseIf Code Like (String(7, "#") & "*") And Len(Code) <= 12 Then
 
-    FixedCode = String(13 - Len(Code), "0") & Code
+    FixedCode = String(13 - Len(Code), "0") & FixedCode
     
 Else
 'どの条件にも一致しない場合でも、値は返す
