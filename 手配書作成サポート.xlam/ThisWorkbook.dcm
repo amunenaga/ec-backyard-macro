@@ -9,10 +9,10 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = True
 Option Explicit
 
-Private Sub Workbook_AddinInstall()
+Private Sub Workbook_Open()
 
 Dim PurchaseAssist As CommandBarPopup
-Set PurchaseAssist = Application.CommandBars("Worksheet Menu Bar").Controls.Add(Type:=msoControlPopup)
+Set PurchaseAssist = Application.CommandBars("Worksheet Menu Bar").Controls.Add(Type:=msoControlPopup, Temporary:=True)
     PurchaseAssist.Caption = "手配サポート"
 
 Dim ButtonPrintAll As CommandBarControl
