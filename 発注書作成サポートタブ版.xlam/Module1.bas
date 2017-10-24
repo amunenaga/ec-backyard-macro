@@ -1,15 +1,16 @@
 Attribute VB_Name = "Module1"
 Option Explicit
 
-'リボンUIのタブのカスタマイズ方法
-'@url
-'@url
+'リボンUIのタブを追加するアドイン作成方法
+'@url http://labs.septeni.co.jp/entry/20140709/1404839264
+'@url https://qiita.com/fmaeyama/items/93d10a1a5cd6cd6e9dd8
+'@url http://www.ka-net.org/ribbon/ri05.html
 
 Sub CloseAllPo(control As IRibbonControl)
 
 Dim Flg As Integer
 
-Flg = MsgBox(Prompt:="開いているファイル全て閉じます。" & vbLf & "よろしいですか？", Buttons:=vbOKCancel)
+Flg = MsgBox(Prompt:="開いている発注書ファイルを全て閉じます。" & vbLf & "よろしいですか？", Buttons:=vbOKCancel)
 
 If Flg <> 1 Then Exit Sub
 
@@ -29,7 +30,7 @@ Sub PrintAllPo(control As IRibbonControl)
 
 Dim Flg As Integer
 
-Flg = MsgBox(Prompt:="開いているファイル全て印刷します。" & vbLf & "よろしいですか？", Buttons:=vbOKCancel)
+Flg = MsgBox(Prompt:="開いている発注書ファイルを全て印刷します。" & vbLf & "よろしいですか？" & vbLf & vbLf & "使用プリンタ：" & Application.ActivePrinter, Buttons:=vbOKCancel)
 
 If Flg <> 1 Then Exit Sub
 
