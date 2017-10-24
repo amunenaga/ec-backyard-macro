@@ -1,0 +1,12 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+	<ribbon>
+		<tabs>
+			<tab id="SupportPurchase" label="手配サポート" insertAfterMso="TabAddIns">
+				<group id="SupportActions" label="発注書">
+					<button id="PrintAll" label="全て印刷" size="large" onAction="PrintAllPo" imageMso="FilePrint" />
+					<button id="CloseAll" label="全て閉じる" size="large" onAction="CloseAllPo" imageMso="FileClose" />
+				</group>
+			</tab>
+		</tabs>
+	</ribbon>
+</customUI>
