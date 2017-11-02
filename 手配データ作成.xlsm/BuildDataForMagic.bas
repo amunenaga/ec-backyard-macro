@@ -53,6 +53,15 @@ End If
 'データ出力用のシートに、1行ずつコピー
 Worksheets("手配数量入力シート").Activate
 
+'手配数量列に空欄がないかチェック
+If WorksheetFunction.CountIf(Range("A1:A" & ActiveSheet.UsedRange.Rows.Count), "") > 0 Then
+    
+    Dim BlankRow As Long
+    BlankRow = Range("A1").End(xlDown).Row + 1
+    MsgBox "数量列に空欄があります。" & vbLf & BlankRow & "行目"
+    
+End If
+
 Dim i As Long
 For i = 2 To Range("A1").End(xlDown).Row
 
