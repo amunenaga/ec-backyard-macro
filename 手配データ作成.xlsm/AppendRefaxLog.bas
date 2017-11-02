@@ -87,6 +87,7 @@ End If
 
 On Error Resume Next
     Application.Run "FAX納期回答リスト.xlsm!一ヶ月以前転記"
+    Application.Run "FAX納期回答リスト.xlsm!三ヶ月以前削除"
     Application.Run "FAX納期回答リスト.xlsm!入荷日の算出式を入力"
     Application.Run "FAX納期回答リスト.xlsm!条件付き書式範囲修正"
 On Error GoTo 0
