@@ -21,7 +21,7 @@ Sub CheckNonArrival()
 'WEB商魂から、注残がないか調べて未入荷が有れば備考列へ追記
 
 '取得できなくても処理はとにかく続行
-'On Error Resume Next
+On Error Resume Next
 
 Dim CodeRange As Range, r As Range
 Set CodeRange = Worksheets("手配数量入力シート").Range(Cells(2, 7), Cells(2, 7).End(xlDown))
@@ -37,13 +37,19 @@ For Each r In CodeRange
     LastPur = InitPur
     LastPur = FetchRecentPurchase(Code)
     
-    If LastPur.NonArrivalQty > 1 Then
+    '未入荷が0個でなく、2個以上か1ヶ月以上経過しているか？
+    '未入荷がロット単位なら、追加手配が不要な場合がある。また、1ヶ月以上の未入荷は入荷目処がつかない場合があるため。
+    If LastPur.NonArrivalQty > 0 And (LastPur.NonArrivalQty > 1 Or DateDiff("d", LastPur.PurchaseDate, Date) > 30) Then
         
         Dim CautionCell As Range
         Set CautionCell = r.Offset(0, -5)
         
-        CautionCell.Value = CautionCell.Value & IIf(CautionCell.Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
+        '発注用商品情報に廃番、不可が記載されていれば、手配保留とするため未入荷は表示しなくてよい。
+        If Not CautionCell.Value Like "*廃番*" And Not CautionCell.Value Like "*不可*" Then
+        
+            CautionCell.Value = CautionCell.Value & IIf(CautionCell.Value = "", "", " ") & "未入荷" & LastPur.NonArrivalQty & "個 " & Format(LastPur.PurchaseDate, "M月d日") & "手配分"
     
+        End If
     End If
 
 Continue:
