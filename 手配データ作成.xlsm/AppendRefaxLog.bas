@@ -85,6 +85,7 @@ If Range("A2").Value <> "" Then
 
 End If
 
+'FAX納期回答リスト.xlsmのマクロを実行する
 On Error Resume Next
     Application.Run "FAX納期回答リスト.xlsm!一ヶ月以前転記"
     Application.Run "FAX納期回答リスト.xlsm!三ヶ月以前削除"
