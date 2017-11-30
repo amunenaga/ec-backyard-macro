@@ -21,7 +21,7 @@ Sub CheckNonArrival()
 'WEB商魂から、注残がないか調べて未入荷が有れば備考列へ追記
 
 '取得できなくても処理はとにかく続行
-On Error Resume Next
+'On Error Resume Next
 
 Dim CodeRange As Range, r As Range
 Set CodeRange = Worksheets("手配数量入力シート").Range(Cells(2, 7), Cells(2, 7).End(xlDown))
@@ -104,20 +104,20 @@ Private Sub untilReady(objIE As Object, Optional ByVal WaitTime As Integer = 20)
     'サーバーレスポンス待機
     Dim starttime As Date
     starttime = Now()
+    
     Do While objIE.Busy = True Or objIE.ReadyState <> READYSTATE_COMPLETE
-        DoEvents
+
         If Now() > DateAdd("S", WaitTime, starttime) Then
             Exit Do
         End If
+    
     Loop
     
     'ローディング画面の表示後に、詳細データが動的に再描画されるので2秒待機
     Dim WaitEnd As Date
     WaitEnd = DateAdd("S", 2, Now())
     Do While Now() < WaitEnd
-        DoEvents
+
     Loop
-    
-    DoEvents
 
 End Sub
