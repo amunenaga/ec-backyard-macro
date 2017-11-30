@@ -5,18 +5,24 @@ Sub LoadAllPicking(Optional ByRef TargetFolder As String)
 '手配依頼チェック済のピッキングファイルを一括して読込
 '手配依頼として背景色が変えてある行をコピーします。
 
-Dim PickingFilePaths() As String
-PickingFilePaths = SearchPickingFiles(TargetFolder)
+Dim Fso As New FileSystemObject, PickingFiles As Variant, File As Variant
 
-'セラー分ピッキングファイル読み込み
-Dim Path As Variant
-For Each Path In Array(PickingFilePaths(0), PickingFilePaths(1), PickingFilePaths(2))
-    Call LoadSellerPicking(Path)
-Next
+Set PickingFiles = Fso.GetFolder(TargetFolder).Files
 
-'卸分ピッキングファイル読み込み
-For Each Path In Array(PickingFilePaths(3), PickingFilePaths(4))
-    Call LoadPoFile(Path)
+For Each File In PickingFiles
+
+    If File.Name Like "*アマゾン棚なし*" Then
+    
+        '卸ピッキングファイル読み込み
+        Call LoadPoFile(File.Path)
+    
+    ElseIf File.Name Like "*-a*" And Not File.Name Like "*AR*" Then
+        
+        'セラー分ピッキングファイル読み込み
+        Call LoadSellerPicking(File.Path)
+    
+    End If
+
 Next
 
 Call ApendSpToPurchseReq
@@ -49,24 +55,38 @@ On Error Resume Next
 
 On Error GoTo 0
 
+'開いたファイルがActiveなので、コピー元の棚なしにActivesheetをセット
 Dim NoLocationSheet As Worksheet
 Set NoLocationSheet = ActiveSheet
 
 
-'開いているピッキングシートから、背景色を判定しつつ1行ずつデータコピー
+'手配依頼セラー分のシート最終行
 Dim WriteRow As Long, i As Long
 WriteRow = IIf(PurchaseReqSeller.Range("A2").Value = "", 2, PurchaseReqSeller.Range("A1").End(xlDown).Row + 1)
+
+'開いているピッキングシートから、背景色を判定しつつ1行ずつデータコピー
+PurchaseReqSeller.Activate
 
 For i = 3 To NoLocationSheet.Range("A1").SpecialCells(xlLastCell).Row
     
     If NoLocationSheet.Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
         
-        'ピッキング-aの背景白でない行を一旦コピー
-        NoLocationSheet.Range(Cells(i, 2), Cells(i, 5)).Copy
-        '値で貼り付け
-        PurchaseReqSeller.Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
+        'ピッキング-aの背景白でない行を一旦配列へ入れる
+        Dim arr(3) As Variant
         
-        PurchaseReqSeller.Cells(WriteRow, 1).Value = Mall
+        With NoLocationSheet
+            arr(0) = .Cells(i, 2).Value
+            arr(1) = .Cells(i, 3).Value
+            arr(2) = .Cells(i, 4).Value
+            arr(3) = .Cells(i, 5).Value
+        End With
+        
+        '配列をセラー分シートへ入れる。Copyと値で貼り付けではExcel2013で範囲が欠落する場合がある
+        With PurchaseReqSeller
+            .Range(Cells(WriteRow, 2), Cells(WriteRow, 5)).NumberFormatLocal = "@"
+            .Range(Cells(WriteRow, 2), Cells(WriteRow, 5)) = arr
+            .Cells(WriteRow, 1).Value = Mall
+        End With
         
         WriteRow = WriteRow + 1
         
@@ -74,7 +94,7 @@ For i = 3 To NoLocationSheet.Range("A1").SpecialCells(xlLastCell).Row
 
 Next
 
-ActiveWorkbook.Close SaveChanges:=False
+NoLocationSheet.Parent.Close SaveChanges:=False
 
 End Sub
 Private Sub LoadPoFile(ByVal PickingFilePath As String)
@@ -92,33 +112,36 @@ Dim NoLocationSheet As Worksheet
 Set NoLocationSheet = ActiveSheet
 
 '開いているピッキングシートから、手配依頼読込シートへデータコピー
+PurchaseReqWholesall.Activate
 
 Dim WriteRow As Long, i As Long
 WriteRow = IIf(PurchaseReqWholesall.Range("A2").Value = "", 2, PurchaseReqWholesall.Range("A1").End(xlDown).Row + 1)
 
-For i = 2 To ActiveSheet.Range("A1").SpecialCells(xlLastCell).Row
+For i = 2 To NoLocationSheet.Range("A1").SpecialCells(xlLastCell).Row
     
-    If Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
+    If NoLocationSheet.Cells(i, 2).Interior.Color <> RGB(255, 255, 255) Then
         
-        'POとJANをコピー・貼り付け
-        NoLocationSheet.Range(Cells(i, 1), Cells(i, 2)).Copy
-        PurchaseReqWholesall.Cells(WriteRow, 2).PasteSpecial Paste:=xlPasteValues
-        
-        '商品名
-        NoLocationSheet.Cells(i, 5).Copy
-        PurchaseReqWholesall.Cells(WriteRow, 4).PasteSpecial Paste:=xlPasteValues
-        
-        '数量
-        NoLocationSheet.Cells(i, 9).Copy
-        PurchaseReqWholesall.Cells(WriteRow, 5).PasteSpecial Paste:=xlPasteValues
-        
-        PurchaseReqWholesall.Cells(WriteRow, 1).Value = "V"
+        Dim arr(3) As Variant
+        'POとJANをコピー・貼り付け、セラー分と同様、一旦配列へ入れる
+        With NoLocationSheet
+            arr(0) = .Cells(i, 1).Value   'PO
+            arr(1) = .Cells(i, 2).Value   'Jan
+            arr(2) = .Cells(i, 5).Value   '商品名
+            arr(3) = .Cells(i, 9).Value   '数量
+        End With
+                
+        With PurchaseReqWholesall
+            .Range(Cells(WriteRow, 2), Cells(WriteRow, 5)).NumberFormatLocal = "@"
+            .Range(Cells(WriteRow, 2), Cells(WriteRow, 5)) = arr
+            .Cells(WriteRow, 1).Value = "V"
+        End With
         
         WriteRow = WriteRow + 1
+
     End If
 Next
 
-ActiveWorkbook.Close SaveChanges:=False
+NoLocationSheet.Parent.Close SaveChanges:=False
 
 End Sub
 
