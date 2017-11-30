@@ -268,7 +268,7 @@ With NoEntryItemSheet
     If MallName = "Amazon" Then
         .Columns("G").Insert
         .Range("G2").Value = "‘——¿"
-        .Range(Cells(2, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
+        .Range(Cells(3, 7), Cells(.UsedRange.Rows.Count, 7)).Value = 0
     End If
     
     'Œrüˆø‚¢‚Ä•Û‘¶
